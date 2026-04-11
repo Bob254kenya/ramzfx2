@@ -158,12 +158,12 @@ const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete, duration = 600
         onMouseLeave={handleMouseLeave}
       >
         <div className="logo">
-          <div className="logo-main">DESSFX</div>
+          <div className="logo-main">RAMZFX</div>
           <div className="logo-sub">TRADINGHUB</div>
         </div>
         
         <div className="welcome-message">
-          <div className="welcome-title">Welcome to deriv third party powered website</div>
+          <div className="welcome-title">WELCOME TO RAMZFX — SMART TRADING MADE SIMPLE. </div>
           <div className="welcome-text">Gain access to premium trading features unavailable on the official platform</div>
         </div>
         
