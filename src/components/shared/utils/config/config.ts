@@ -4,15 +4,15 @@ import { isStaging } from '../url/helpers';
 export const APP_IDS = {
     LOCALHOST: 36300,
     STAGING: 29934,
-    PRODUCTION: 131526,
+    PRODUCTION: 132580,
 };
 
 export const livechat_license_id = 12049137;
 export const livechat_client_id = '66aa088aad5a414484c1fd1fa8a5ace7';
 
 export const domain_app_ids = {
-    'bossiousfx.vercel.app': 131526,
-    'www.bossiousfx.site': 131526,
+    'bossiousfx.vercel.app': 132580,
+    'www.bossiousfx.site': 132580,
 };
 
 export const getCurrentProductionDomain = () =>
