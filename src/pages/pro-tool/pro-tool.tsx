@@ -1,21 +1,13 @@
 // TradeUiClone.tsx
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from "framer-motion";
-import { ArrowUp, ArrowDown, Hash, Sigma, Dice5, Play, StopCircle, Trash2, Scan, Home, RefreshCw, Shield, Zap, Eye, Anchor, Download, Upload, X, Users, MessageCircle, MessageSquare, Youtube, Instagram, Music } from "lucide-react";
-import { localize } from '@deriv-com/translations';
+import { ArrowUp, ArrowDown, Hash, Sigma, Dice5, Play, StopCircle, Trash2, Scan, Home, RefreshCw, Shield, Zap, Eye, Anchor, Download, Upload, X } from "lucide-react";
 import { generateDerivApiInstance, V2GetActiveClientId, V2GetActiveToken } from '@/external/bot-skeleton/services/api/appId';
 import { tradeOptionToBuy } from '@/external/bot-skeleton/services/tradeEngine/utils/helpers';
-import { contract_stages } from '@/constants/contract-stage';
 import { useStore } from '@/hooks/useStore';
 import './pro-tool.scss';
 
 // Types
-interface MarketSymbol {
-  symbol: string;
-  display_name?: string;
-}
-
 interface LogEntry {
   id: number;
   time: string;
@@ -150,34 +142,12 @@ const Switch = ({ checked, onCheckedChange, className = "" }: {
 const Badge = ({ children, variant, className = "" }: { children: React.ReactNode; variant?: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }) => {
   const baseClass = "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium";
   const variants = {
-    default: "bg-blue-100 text-blue-800",
-    secondary: "bg-gray-100 text-gray-800",
-    destructive: "bg-red-100 text-red-800",
-    outline: "border border-gray-300 text-gray-700"
+    default: "bg-blue-500/20 text-blue-300",
+    secondary: "bg-gray-700/50 text-gray-300",
+    destructive: "bg-red-500/20 text-red-300",
+    outline: "border border-gray-600 text-gray-300"
   };
   return <span className={`${baseClass} ${variants[variant || 'default']} ${className}`}>{children}</span>;
-};
-
-// Button Component
-const Button = ({ children, onClick, variant, size, className = "", disabled = false }: any) => {
-  const baseClass = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
-  const variants = {
-    default: "bg-gray-900 text-white hover:bg-gray-800",
-    outline: "border border-gray-300 bg-transparent hover:bg-gray-100",
-    destructive: "bg-red-600 text-white hover:bg-red-700",
-    ghost: "hover:bg-gray-100"
-  };
-  const sizes = {
-    default: "h-10 px-4 py-2",
-    sm: "h-8 rounded-md px-3 text-xs",
-    lg: "h-11 rounded-md px-8",
-    icon: "h-10 w-10"
-  };
-  return (
-    <button className={`${baseClass} ${variants[variant || 'default']} ${sizes[size || 'default']} ${className}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  );
 };
 
 // Input Component
@@ -187,7 +157,7 @@ const Input = ({ type = "text", value, onChange, placeholder, className = "", di
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 ${className}`}
+    className={`w-full rounded-md border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-200 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 ${className}`}
     disabled={disabled}
     min={min}
     max={max}
@@ -204,18 +174,18 @@ const Select = ({ value, onValueChange, children, disabled = false }: any) => {
     <div className="relative">
       <button
         type="button"
-        className="flex h-7 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+        className="flex h-7 w-full items-center justify-between rounded-md border border-gray-700 bg-gray-800/50 px-3 py-1 text-xs text-gray-200 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
       >
         <span>{selectedChild ? (selectedChild as any).props.children : 'Select...'}</span>
-        <span>▼</span>
+        <span className="text-gray-400">▼</span>
       </button>
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-700 bg-gray-800 shadow-lg">
           {React.Children.map(children, (child: any) => (
             <div
-              className="cursor-pointer px-3 py-1 text-xs hover:bg-gray-100"
+              className="cursor-pointer px-3 py-1 text-xs text-gray-300 hover:bg-gray-700"
               onClick={() => {
                 onValueChange(child.props.value);
                 setIsOpen(false);
@@ -231,7 +201,7 @@ const Select = ({ value, onValueChange, children, disabled = false }: any) => {
 };
 
 const SelectTrigger = ({ children, className = "" }: any) => <div className={className}>{children}</div>;
-const SelectValue = ({ placeholder }: any) => <span className="text-gray-500">{placeholder}</span>;
+const SelectValue = ({ placeholder }: any) => <span className="text-gray-400">{placeholder}</span>;
 const SelectContent = ({ children }: any) => <>{children}</>;
 const SelectItem = ({ value, children }: any) => <div value={value}>{children}</div>;
 
@@ -241,7 +211,7 @@ const Textarea = ({ value, onChange, placeholder, className = "", disabled = fal
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 ${className}`}
+    className={`w-full rounded-md border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-200 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 ${className}`}
     disabled={disabled}
   />
 );
@@ -319,9 +289,9 @@ const TPSLNotificationPopup = () => {
   );
 };
 
-// Main Pro Scanner Bot Component (integrated into TradeUiClone)
-const ProScannerBotIntegrated = () => {
-  const { run_panel, transactions } = useStore();
+// Main Pro Scanner Bot Component
+const ProScannerBot = () => {
+  const { transactions } = useStore();
   const apiRef = useRef<any>(null);
   const tickStreamIdRef = useRef<string | null>(null);
   
@@ -374,11 +344,10 @@ const ProScannerBotIntegrated = () => {
   const [scannerActive, setScannerActive] = useState(false);
   const [turboMode, setTurboMode] = useState(false);
   const [botName, setBotName] = useState('');
-  const [turboLatency, setTurboLatency] = useState(0);
+  const [turboLatency] = useState(0);
   const [ticksCaptured, setTicksCaptured] = useState(0);
-  const [ticksMissed, setTicksMissed] = useState(0);
+  const [ticksMissed] = useState(0);
   const turboBuffersRef = useRef<Map<string, CircularTickBuffer>>(new Map());
-  const lastTickTsRef = useRef(0);
 
   const [botStatus, setBotStatus] = useState<BotStatus>('idle');
   const [isRunning, setIsRunning] = useState(false);
@@ -394,7 +363,6 @@ const ProScannerBotIntegrated = () => {
   const logIdRef = useRef(0);
   const [localBalance, setLocalBalance] = useState(10000);
   const [accountCurrency, setAccountCurrency] = useState('USD');
-  const [symbols, setSymbols] = useState<{ symbol: string; display_name: string }[]>([]);
   const [lastDigit, setLastDigit] = useState<number | null>(null);
   const [digits, setDigits] = useState<number[]>([]);
   
@@ -404,9 +372,6 @@ const ProScannerBotIntegrated = () => {
   const connectionRetryCountRef = useRef(0);
   const MAX_CONNECTION_RETRIES = 3;
 
-  const lastPnlRef = useRef(0);
-  const tpNotifiedRef = useRef(false);
-  const slNotifiedRef = useRef(false);
   const shouldStopRef = useRef(false);
   const patternTradeTakenRef = useRef(false);
 
@@ -425,13 +390,6 @@ const ProScannerBotIntegrated = () => {
             setAccountCurrency(authorize.currency || 'USD');
             setLocalBalance(authorize.balance || 10000);
             setIsConnected(true);
-            
-            // Fetch symbols
-            const { active_symbols } = await api.send({ active_symbols: 'brief' });
-            const syn = (active_symbols || [])
-              .filter((s: any) => /synthetic/i.test(s.market) || /^R_/.test(s.symbol))
-              .map((s: any) => ({ symbol: s.symbol, display_name: s.display_name }));
-            setSymbols(syn);
           }
         }
         
@@ -820,9 +778,6 @@ const ProScannerBotIntegrated = () => {
     setVhFakeLosses(0);
     setVhConsecLosses(0);
     setVhStatus('idle');
-    tpNotifiedRef.current = false;
-    slNotifiedRef.current = false;
-    lastPnlRef.current = 0;
     setNetProfit(0);
     patternTradeTakenRef.current = false;
     
@@ -1080,22 +1035,18 @@ const ProScannerBotIntegrated = () => {
     setVhConsecLosses(0);
     setVhStatus('idle');
     setTicksCaptured(0);
-    setTicksMissed(0);
-    tpNotifiedRef.current = false;
-    slNotifiedRef.current = false;
-    lastPnlRef.current = 0;
     patternTradeTakenRef.current = false;
     shouldStopRef.current = false;
   }, []);
   
   const statusConfig: Record<BotStatus, { icon: string; label: string; color: string }> = {
-    idle: { icon: '⚪', label: 'IDLE', color: 'text-gray-500' },
-    trading_m1: { icon: '🟢', label: 'TRADING M1', color: 'text-green-600' },
-    recovery: { icon: '🟣', label: 'RECOVERY MODE', color: 'text-purple-600' },
-    waiting_pattern: { icon: '🟡', label: 'WAITING PATTERN', color: 'text-yellow-600' },
-    pattern_matched: { icon: '✅', label: 'PATTERN MATCHED', color: 'text-green-600' },
-    virtual_hook: { icon: '🎣', label: 'VIRTUAL HOOK', color: 'text-blue-600' },
-    reconnecting: { icon: '🔄', label: 'RECONNECTING...', color: 'text-orange-600' },
+    idle: { icon: '⚪', label: 'IDLE', color: 'text-gray-400' },
+    trading_m1: { icon: '🟢', label: 'TRADING M1', color: 'text-emerald-400' },
+    recovery: { icon: '🟣', label: 'RECOVERY MODE', color: 'text-purple-400' },
+    waiting_pattern: { icon: '🟡', label: 'WAITING PATTERN', color: 'text-yellow-400' },
+    pattern_matched: { icon: '✅', label: 'PATTERN MATCHED', color: 'text-emerald-400' },
+    virtual_hook: { icon: '🎣', label: 'VIRTUAL HOOK', color: 'text-blue-400' },
+    reconnecting: { icon: '🔄', label: 'RECONNECTING...', color: 'text-orange-400' },
   };
   
   const status = statusConfig[botStatus];
@@ -1113,7 +1064,9 @@ const ProScannerBotIntegrated = () => {
         {/* Header */}
         <div className="scanner-header">
           <div className="header-left">
-            <Scan size={24} />
+            <div className="logo-icon">
+              <Scan size={24} />
+            </div>
             <div>
               <h1>Milliefx Pro Scanner Bot</h1>
               <p>Advanced Market Scanning & Recovery System</p>
@@ -1153,7 +1106,7 @@ const ProScannerBotIntegrated = () => {
           
           <div className="stat-card">
             <div className="stat-header">
-              <Zap size={14} className={turboMode ? 'text-green-600' : ''} />
+              <Zap size={14} className={turboMode ? 'text-emerald-400' : ''} />
               <span>Turbo Mode</span>
               <button className={`turbo-btn ${turboMode ? 'active' : ''}`} onClick={() => setTurboMode(!turboMode)} disabled={isRunning}>
                 {turboMode ? '⚡ ON' : 'OFF'}
@@ -1169,12 +1122,12 @@ const ProScannerBotIntegrated = () => {
           <div className="stat-card">
             <div className="stat-header">
               <span>Live Stats</span>
-              <strong>${localBalance.toFixed(2)}</strong>
+              <strong className="text-blue-400">${localBalance.toFixed(2)}</strong>
             </div>
             <div className="live-stats">
-              <div><span>W/L</span><strong><span className="text-green-600">{wins}</span>/<span className="text-red-600">{losses}</span></strong></div>
-              <div><span>P/L</span><strong className={netProfit >= 0 ? 'text-green-600' : 'text-red-600'}>${netProfit.toFixed(2)}</strong></div>
-              <div><span>Stake</span><strong>${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="text-yellow-600">M{martingaleStep}</span>}</strong></div>
+              <div><span>W/L</span><strong><span className="text-emerald-400">{wins}</span>/<span className="text-red-400">{losses}</span></strong></div>
+              <div><span>P/L</span><strong className={netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}>${netProfit.toFixed(2)}</strong></div>
+              <div><span>Stake</span><strong>${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="text-yellow-400 ml-1">M{martingaleStep}</span>}</strong></div>
             </div>
           </div>
         </div>
@@ -1250,10 +1203,10 @@ const ProScannerBotIntegrated = () => {
               <div className="hook-stats">
                 <h3><Anchor size={12} /> Hook Status</h3>
                 <div className="hook-stats-grid">
-                  <div><span>V-Win</span><strong className="text-green-600">{vhFakeWins}</strong></div>
-                  <div><span>V-Loss</span><strong className="text-red-600">{vhFakeLosses}</strong></div>
-                  <div><span>Streak</span><strong className="text-yellow-600">{vhConsecLosses}</strong></div>
-                  <div><span>State</span><strong className={vhStatus === 'confirmed' ? 'text-green-600' : vhStatus === 'waiting' ? 'text-yellow-600' : ''}>{vhStatus === 'confirmed' ? '✓' : vhStatus === 'waiting' ? '⏳' : '—'}</strong></div>
+                  <div><span>V-Win</span><strong className="text-emerald-400">{vhFakeWins}</strong></div>
+                  <div><span>V-Loss</span><strong className="text-red-400">{vhFakeLosses}</strong></div>
+                  <div><span>Streak</span><strong className="text-yellow-400">{vhConsecLosses}</strong></div>
+                  <div><span>State</span><strong className={vhStatus === 'confirmed' ? 'text-emerald-400' : vhStatus === 'waiting' ? 'text-yellow-400' : ''}>{vhStatus === 'confirmed' ? '✓' : vhStatus === 'waiting' ? '⏳' : '—'}</strong></div>
                 </div>
               </div>
             )}
@@ -1476,13 +1429,13 @@ const ProScannerBotIntegrated = () => {
               <h3><Zap size={14} /> Live Status (Realtime)</h3>
               <div className="status-grid">
                 <div><span>Status</span><strong className={status.color}>{status.icon} {status.label}</strong></div>
-                <div><span>Market</span><strong className={currentMarket === 1 ? 'text-green-600' : 'text-purple-600'}>{currentMarket === 1 ? 'M1 (HOME)' : 'M2 (RECOVERY)'}</strong></div>
+                <div><span>Market</span><strong className={currentMarket === 1 ? 'text-emerald-400' : 'text-purple-400'}>{currentMarket === 1 ? 'M1 (HOME)' : 'M2 (RECOVERY)'}</strong></div>
                 <div><span>Win Rate</span><strong>{winRate}%</strong></div>
-                <div><span>Current P/L</span><strong className={netProfit >= 0 ? 'text-green-600' : 'text-red-600'}>${netProfit.toFixed(2)}</strong></div>
-                <div><span>Current Stake</span><strong>${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="text-yellow-600 ml-1">M{martingaleStep}</span>}</strong></div>
-                <div><span>Balance</span><strong className="text-blue-600">${localBalance.toFixed(2)}</strong></div>
+                <div><span>Current P/L</span><strong className={netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}>${netProfit.toFixed(2)}</strong></div>
+                <div><span>Current Stake</span><strong>${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="text-yellow-400 ml-1">M{martingaleStep}</span>}</strong></div>
+                <div><span>Balance</span><strong className="text-blue-400">${localBalance.toFixed(2)}</strong></div>
                 <div><span>Total Staked</span><strong>${totalStaked.toFixed(2)}</strong></div>
-                <div><span>W/L (Session)</span><strong><span className="text-green-600">{wins}</span>/<span className="text-red-600">{losses}</span></strong></div>
+                <div><span>W/L (Session)</span><strong><span className="text-emerald-400">{wins}</span>/<span className="text-red-400">{losses}</span></strong></div>
               </div>
               {botStatus === 'virtual_hook' && (
                 <div className="status-banner hook">
@@ -1520,13 +1473,13 @@ const ProScannerBotIntegrated = () => {
                     ) : logEntries.map(e => (
                       <tr key={e.id} className={`log-row ${e.market === 'M1' ? 'm1' : e.market === 'VH' ? 'vh' : 'm2'}`}>
                         <td>{e.time}</td>
-                        <td className={e.market === 'M1' ? 'text-green-600' : e.market === 'VH' ? 'text-blue-600' : 'text-purple-600'}>{e.market}</td>
+                        <td className={e.market === 'M1' ? 'text-emerald-400' : e.market === 'VH' ? 'text-blue-400' : 'text-purple-400'}>{e.market}</td>
                         <td>{e.symbol}</td>
                         <td>{e.contract.replace('DIGIT', '')}</td>
                         <td>{e.market === 'VH' ? <span className="vh-stake">FAKE</span> : `$${e.stake.toFixed(2)}`}{e.martingaleStep > 0 && e.market !== 'VH' && <span className="martingale-step">M{e.martingaleStep}</span>}</td>
                         <td className="font-mono">{e.exitDigit}</td>
                         <td><span className={`result-badge ${e.result === 'Win' || e.result === 'V-Win' ? 'win' : e.result === 'Loss' || e.result === 'V-Loss' ? 'loss' : 'pending'}`}>{e.result === 'Pending' ? '...' : e.result === 'V-Win' ? '✓' : e.result === 'V-Loss' ? '✗' : e.result}</span></td>
-                        <td className={e.pnl > 0 ? 'text-green-600' : e.pnl < 0 ? 'text-red-600' : ''}>{e.result === 'Pending' ? '...' : e.market === 'VH' ? '-' : `${e.pnl > 0 ? '+' : ''}${e.pnl.toFixed(2)}`}</td>
+                        <td className={e.pnl > 0 ? 'text-emerald-400' : e.pnl < 0 ? 'text-red-400' : ''}>{e.result === 'Pending' ? '...' : e.market === 'VH' ? '-' : `${e.pnl > 0 ? '+' : ''}${e.pnl.toFixed(2)}`}</td>
                         <td>{e.market === 'VH' ? '-' : `$${e.balance.toFixed(2)}`}</td>
                       </tr>
                     ))}
@@ -1541,22 +1494,55 @@ const ProScannerBotIntegrated = () => {
       <TPSLNotificationPopup />
       
       <style>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+          background: #0a0c10;
+        }
+
         .pro-scanner-bot {
           min-height: 100vh;
-          padding: 20px;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+          padding: 24px;
+          background: radial-gradient(circle at 20% 30%, #0f1117, #090b0f);
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+          overflow-y: auto;
+          scroll-behavior: smooth;
+        }
+        
+        .pro-scanner-bot::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .pro-scanner-bot::-webkit-scrollbar-track {
+          background: #1a1d24;
+          border-radius: 4px;
+        }
+        
+        .pro-scanner-bot::-webkit-scrollbar-thumb {
+          background: #3b3f4a;
+          border-radius: 4px;
+        }
+        
+        .pro-scanner-bot::-webkit-scrollbar-thumb:hover {
+          background: #4a4f5c;
         }
         
         .scanner-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: white;
-          border-radius: 16px;
+          background: rgba(18, 22, 28, 0.8);
+          backdrop-filter: blur(12px);
+          border-radius: 20px;
           padding: 16px 24px;
-          margin-bottom: 20px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          margin-bottom: 24px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
         
         .header-left {
@@ -1565,17 +1551,26 @@ const ProScannerBotIntegrated = () => {
           gap: 16px;
         }
         
+        .logo-icon {
+          padding: 10px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 14px;
+          color: white;
+        }
+        
         .header-left h1 {
           font-size: 20px;
           margin: 0;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+          font-weight: 700;
+          letter-spacing: -0.3px;
         }
         
         .header-left p {
           font-size: 12px;
-          color: #666;
+          color: #8a8f9e;
           margin: 0;
         }
         
@@ -1589,14 +1584,21 @@ const ProScannerBotIntegrated = () => {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 20px;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
         
         .stat-card {
-          background: white;
-          border-radius: 12px;
+          background: rgba(18, 22, 28, 0.7);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
           padding: 16px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          transition: all 0.2s ease;
+        }
+        
+        .stat-card:hover {
+          border-color: rgba(102, 126, 234, 0.3);
+          background: rgba(22, 26, 34, 0.8);
         }
         
         .stat-header {
@@ -1604,28 +1606,34 @@ const ProScannerBotIntegrated = () => {
           align-items: center;
           gap: 8px;
           margin-bottom: 12px;
-          font-size: 14px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 500;
+          color: #cbd5e1;
         }
         
         .market-tags {
           display: flex;
           flex-wrap: wrap;
           gap: 6px;
-          max-height: 100px;
+          max-height: 80px;
           overflow-y: auto;
+        }
+        
+        .market-tags::-webkit-scrollbar {
+          width: 4px;
         }
         
         .market-tag {
           font-size: 10px;
-          padding: 2px 8px;
-          border-radius: 12px;
-          background: #f0f0f0;
-          color: #666;
+          padding: 3px 10px;
+          border-radius: 20px;
+          background: rgba(45, 50, 60, 0.6);
+          color: #9ca3af;
+          transition: all 0.2s;
         }
         
         .market-tag.active {
-          background: #667eea;
+          background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
         }
         
@@ -1637,13 +1645,15 @@ const ProScannerBotIntegrated = () => {
           cursor: pointer;
           font-size: 11px;
           font-weight: 600;
-          background: #e0e0e0;
+          background: #2d323e;
+          color: #9ca3af;
+          transition: all 0.2s;
         }
         
         .turbo-btn.active {
-          background: #10b981;
+          background: linear-gradient(135deg, #10b981, #059669);
           color: white;
-          animation: pulse 1s infinite;
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
         }
         
         .turbo-stats, .live-stats {
@@ -1661,36 +1671,53 @@ const ProScannerBotIntegrated = () => {
         
         .turbo-stats span, .live-stats span {
           font-size: 10px;
-          color: #666;
+          color: #6b7280;
         }
         
         .turbo-stats strong, .live-stats strong {
           font-size: 14px;
+          font-weight: 600;
+          color: #e5e7eb;
         }
         
         .main-layout {
           display: grid;
           grid-template-columns: 380px 1fr;
-          gap: 20px;
+          gap: 24px;
         }
         
         .config-column {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 20px;
+          max-height: calc(100vh - 200px);
+          overflow-y: auto;
+          padding-right: 4px;
+        }
+        
+        .config-column::-webkit-scrollbar {
+          width: 6px;
         }
         
         .right-column {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 20px;
+          max-height: calc(100vh - 200px);
+          overflow-y: auto;
+        }
+        
+        .right-column::-webkit-scrollbar {
+          width: 6px;
         }
         
         .market-card {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
-          border-left: 4px solid;
+          background: rgba(18, 22, 28, 0.7);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
+          padding: 18px;
+          border-left: 3px solid;
+          transition: all 0.2s;
         }
         
         .m1-card { border-left-color: #10b981; }
@@ -1700,55 +1727,61 @@ const ProScannerBotIntegrated = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 12px;
+          margin-bottom: 14px;
         }
         
         .market-card .card-header h3 {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
           font-size: 14px;
+          font-weight: 600;
+          color: #f0f0f0;
           margin: 0;
         }
         
         .hook-section {
-          margin-top: 12px;
-          padding-top: 12px;
-          border-top: 1px solid #e0e0e0;
+          margin-top: 14px;
+          padding-top: 14px;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
         
         .hook-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
           font-size: 12px;
+          color: #cbd5e1;
         }
         
         .hook-inputs {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 8px;
+          gap: 10px;
         }
         
         .hook-inputs label {
           font-size: 10px;
-          color: #666;
+          color: #8a8f9e;
+          margin-bottom: 4px;
+          display: block;
         }
         
         .hook-stats {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border-radius: 12px;
-          padding: 12px;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+          border: 1px solid rgba(102, 126, 234, 0.2);
+          border-radius: 16px;
+          padding: 14px;
         }
         
         .hook-stats h3 {
           font-size: 12px;
-          margin: 0 0 8px 0;
+          margin: 0 0 10px 0;
           display: flex;
           align-items: center;
           gap: 6px;
+          color: #e5e7eb;
         }
         
         .hook-stats-grid {
@@ -1759,34 +1792,37 @@ const ProScannerBotIntegrated = () => {
         
         .hook-stats-grid span {
           font-size: 10px;
-          opacity: 0.8;
+          color: #9ca3af;
           display: block;
         }
         
         .risk-card, .strategy-card, .config-card {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
+          background: rgba(18, 22, 28, 0.7);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
+          padding: 18px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .risk-card h3, .strategy-card h3, .config-card h3 {
           font-size: 14px;
-          margin: 0 0 12px 0;
+          margin: 0 0 14px 0;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
+          color: #e5e7eb;
         }
         
         .risk-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-          margin-bottom: 12px;
+          gap: 14px;
+          margin-bottom: 14px;
         }
         
         .risk-grid label, .martingale-grid label {
           font-size: 10px;
-          color: #666;
+          color: #8a8f9e;
           display: block;
           margin-bottom: 4px;
         }
@@ -1795,111 +1831,132 @@ const ProScannerBotIntegrated = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin: 12px 0;
+          margin: 14px 0;
+          color: #cbd5e1;
+          font-size: 12px;
         }
         
         .martingale-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          margin-bottom: 12px;
+          gap: 14px;
+          margin-bottom: 14px;
         }
         
         .strategy-checkboxes {
           display: flex;
-          gap: 16px;
-          margin-top: 12px;
+          gap: 20px;
+          margin-top: 14px;
           font-size: 12px;
+          color: #cbd5e1;
+        }
+        
+        .strategy-checkboxes label {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          cursor: pointer;
         }
         
         .strategy-subcard {
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          padding: 12px;
-          margin-bottom: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 12px;
+          padding: 14px;
+          margin-bottom: 14px;
+          background: rgba(0, 0, 0, 0.2);
         }
         
-        .m1-strategy { border-left: 3px solid #10b981; }
-        .m2-strategy { border-left: 3px solid #ef4444; }
+        .m1-strategy { border-left: 2px solid #10b981; }
+        .m2-strategy { border-left: 2px solid #ef4444; }
         
         .strategy-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
           font-size: 12px;
           font-weight: 600;
+          color: #e5e7eb;
         }
         
         .strategy-mode {
-          padding: 2px 8px;
-          border-radius: 12px;
-          border: 1px solid #ddd;
-          background: white;
+          padding: 3px 10px;
+          border-radius: 20px;
+          border: 1px solid #3b3f4a;
+          background: #1f232b;
           font-size: 10px;
           cursor: pointer;
-          margin-left: 4px;
+          margin-left: 6px;
+          color: #9ca3af;
+          transition: all 0.2s;
         }
         
         .strategy-mode.active {
-          background: #667eea;
+          background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
-          border-color: #667eea;
+          border-color: transparent;
         }
         
         .digit-grid {
           display: grid;
           grid-template-columns: 1fr 0.5fr 1fr;
-          gap: 8px;
+          gap: 10px;
         }
         
         .pattern-status {
           font-size: 10px;
-          margin-top: 6px;
+          margin-top: 8px;
         }
         
         .pattern-status.valid { color: #10b981; }
         .pattern-status.invalid { color: #ef4444; }
         
         .status-message {
-          padding: 8px;
-          border-radius: 8px;
+          padding: 10px;
+          border-radius: 10px;
           text-align: center;
           font-size: 11px;
           font-weight: 600;
-          margin-top: 8px;
+          margin-top: 12px;
         }
         
         .status-message.waiting {
-          background: #fef3c7;
-          color: #d97706;
-          animation: pulse 1s infinite;
+          background: rgba(245, 158, 11, 0.15);
+          color: #fbbf24;
+          border: 1px solid rgba(245, 158, 11, 0.3);
         }
         
         .status-message.matched {
-          background: #d1fae5;
-          color: #059669;
-          animation: pulse 1s infinite;
+          background: rgba(16, 185, 129, 0.15);
+          color: #34d399;
+          border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
         .config-buttons {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          margin-top: 12px;
+          gap: 14px;
+          margin-top: 14px;
         }
         
         .config-buttons button {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 6px;
-          padding: 8px;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          background: white;
+          gap: 8px;
+          padding: 10px;
+          border-radius: 10px;
+          border: 1px solid #3b3f4a;
+          background: #1f232b;
           cursor: pointer;
           font-size: 12px;
+          color: #e5e7eb;
+          transition: all 0.2s;
+        }
+        
+        .config-buttons button:hover:not(:disabled) {
+          background: #2d323e;
+          border-color: #667eea;
         }
         
         .config-buttons button:disabled {
@@ -1908,100 +1965,108 @@ const ProScannerBotIntegrated = () => {
         }
         
         .digits-card {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
+          background: rgba(18, 22, 28, 0.7);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
+          padding: 18px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .digits-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 16px;
+          margin-bottom: 18px;
         }
         
         .digits-header h3 {
           font-size: 14px;
           margin: 0;
+          color: #e5e7eb;
         }
         
         .digits-header span {
           font-size: 11px;
-          color: #666;
+          color: #8a8f9e;
         }
         
         .digits-container {
           display: flex;
-          gap: 8px;
+          gap: 10px;
           justify-content: center;
           flex-wrap: wrap;
         }
         
         .digit-box {
-          width: 48px;
-          height: 56px;
-          border-radius: 8px;
+          width: 52px;
+          height: 60px;
+          border-radius: 12px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           font-weight: bold;
+          transition: all 0.2s;
         }
         
         .digit-box.over {
-          background: rgba(239, 68, 68, 0.1);
+          background: rgba(239, 68, 68, 0.15);
           border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #ef4444;
+          color: #f87171;
         }
         
         .digit-box.under {
-          background: rgba(16, 185, 129, 0.1);
+          background: rgba(16, 185, 129, 0.15);
           border: 1px solid rgba(16, 185, 129, 0.3);
-          color: #10b981;
+          color: #34d399;
         }
         
         .digit-box.last {
           border: 2px solid #667eea;
-          box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+          box-shadow: 0 0 12px rgba(102, 126, 234, 0.4);
+          transform: scale(1.02);
         }
         
         .digit-box .digit {
-          font-size: 20px;
+          font-size: 22px;
+          font-weight: 700;
         }
         
         .digit-box .type {
           font-size: 9px;
-          opacity: 0.6;
+          opacity: 0.7;
         }
         
         .waiting-text {
-          color: #666;
+          color: #8a8f9e;
           font-size: 12px;
         }
         
         .action-btn {
           width: 100%;
-          padding: 20px;
-          border-radius: 12px;
+          padding: 18px;
+          border-radius: 16px;
           border: none;
-          font-size: 18px;
-          font-weight: bold;
+          font-size: 16px;
+          font-weight: 700;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 12px;
           cursor: pointer;
           transition: all 0.3s ease;
+          letter-spacing: 0.5px;
         }
         
         .action-btn.start {
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           color: white;
+          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
         
         .action-btn.start:hover {
-          transform: scale(1.02);
-          box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
         }
         
         .action-btn.stop {
@@ -2013,11 +2078,12 @@ const ProScannerBotIntegrated = () => {
         .action-btn:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+          transform: none;
         }
         
         .pulse-dots {
           display: flex;
-          gap: 4px;
+          gap: 5px;
         }
         
         .pulse-dots .dot {
@@ -2032,24 +2098,27 @@ const ProScannerBotIntegrated = () => {
         .pulse-dots .dot:nth-child(3) { animation-delay: 0.4s; }
         
         .live-status {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
+          background: rgba(18, 22, 28, 0.7);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
+          padding: 18px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .live-status h3 {
           font-size: 14px;
-          margin: 0 0 12px 0;
+          margin: 0 0 14px 0;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
+          color: #e5e7eb;
         }
         
         .status-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 12px;
-          margin-bottom: 12px;
+          gap: 14px;
+          margin-bottom: 14px;
         }
         
         .status-grid div {
@@ -2060,44 +2129,48 @@ const ProScannerBotIntegrated = () => {
         
         .status-grid span {
           font-size: 10px;
-          color: #666;
+          color: #8a8f9e;
         }
         
         .status-grid strong {
           font-size: 13px;
+          font-weight: 600;
+          color: #e5e7eb;
         }
         
         .status-banner {
-          padding: 8px;
-          border-radius: 8px;
+          padding: 10px;
+          border-radius: 12px;
           font-size: 11px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
+          gap: 10px;
         }
         
         .status-banner.hook {
-          background: #dbeafe;
-          color: #1e40af;
-          animation: pulse 1s infinite;
+          background: rgba(59, 130, 246, 0.15);
+          color: #60a5fa;
+          border: 1px solid rgba(59, 130, 246, 0.3);
         }
         
         .status-banner.waiting {
-          background: #fef3c7;
-          color: #92400e;
-          animation: pulse 1s infinite;
+          background: rgba(245, 158, 11, 0.15);
+          color: #fbbf24;
+          border: 1px solid rgba(245, 158, 11, 0.3);
         }
         
         .activity-log {
-          background: white;
-          border-radius: 12px;
+          background: rgba(18, 22, 28, 0.7);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
           overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .log-header {
-          padding: 12px 16px;
-          border-bottom: 1px solid #e0e0e0;
+          padding: 14px 18px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -2108,30 +2181,40 @@ const ProScannerBotIntegrated = () => {
           margin: 0;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
+          color: #e5e7eb;
         }
         
         .log-actions {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
         }
         
         .log-info {
           font-size: 10px;
-          color: #666;
+          color: #8a8f9e;
         }
         
         .log-actions button {
           background: none;
           border: none;
           cursor: pointer;
-          color: #999;
+          color: #6b7280;
+          transition: color 0.2s;
+        }
+        
+        .log-actions button:hover {
+          color: #ef4444;
         }
         
         .log-table-container {
-          max-height: 500px;
+          max-height: 400px;
           overflow: auto;
+        }
+        
+        .log-table-container::-webkit-scrollbar {
+          width: 6px;
         }
         
         .log-table {
@@ -2142,61 +2225,63 @@ const ProScannerBotIntegrated = () => {
         
         .log-table th {
           text-align: left;
-          padding: 10px 8px;
-          background: #f8f9fa;
+          padding: 12px 8px;
+          background: rgba(0, 0, 0, 0.3);
           position: sticky;
           top: 0;
           font-weight: 600;
-          color: #666;
+          color: #9ca3af;
+          font-size: 10px;
         }
         
         .log-table td {
-          padding: 8px;
-          border-bottom: 1px solid #f0f0f0;
+          padding: 10px 8px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          color: #d1d5db;
         }
         
-        .log-row.m1 { border-left: 3px solid #10b981; }
-        .log-row.m2 { border-left: 3px solid #8b5cf6; }
-        .log-row.vh { border-left: 3px solid #3b82f6; }
+        .log-row.m1 { border-left: 2px solid #10b981; }
+        .log-row.m2 { border-left: 2px solid #8b5cf6; }
+        .log-row.vh { border-left: 2px solid #3b82f6; }
         
         .vh-stake {
-          color: #3b82f6;
+          color: #60a5fa;
           font-weight: 600;
         }
         
         .martingale-step {
-          color: #f59e0b;
-          margin-left: 4px;
+          color: #fbbf24;
+          margin-left: 5px;
           font-weight: bold;
         }
         
         .result-badge {
-          padding: 2px 8px;
-          border-radius: 12px;
+          padding: 3px 10px;
+          border-radius: 20px;
           font-size: 9px;
           font-weight: bold;
+          display: inline-block;
         }
         
         .result-badge.win {
-          background: #d1fae5;
-          color: #059669;
+          background: rgba(16, 185, 129, 0.2);
+          color: #34d399;
         }
         
         .result-badge.loss {
-          background: #fee2e2;
-          color: #dc2626;
+          background: rgba(239, 68, 68, 0.2);
+          color: #f87171;
         }
         
         .result-badge.pending {
-          background: #fef3c7;
-          color: #d97706;
-          animation: pulse 1s infinite;
+          background: rgba(245, 158, 11, 0.2);
+          color: #fbbf24;
         }
         
         .empty-log {
           text-align: center;
           padding: 48px;
-          color: #999;
+          color: #6b7280;
         }
         
         .empty-log svg {
@@ -2206,7 +2291,7 @@ const ProScannerBotIntegrated = () => {
         
         @keyframes pulse {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
+          50% { opacity: 0.6; }
         }
         
         @keyframes bounce {
@@ -2216,22 +2301,25 @@ const ProScannerBotIntegrated = () => {
         
         @keyframes glowPulse {
           0%, 100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.3); }
-          50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+          50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
         }
         
         /* Form element styles */
         input, select, textarea {
           width: 100%;
-          padding: 8px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
+          padding: 8px 12px;
+          border: 1px solid #2d323e;
+          border-radius: 10px;
           font-size: 12px;
+          background: #1a1e26;
+          color: #e5e7eb;
+          transition: all 0.2s;
         }
         
         input:focus, select:focus, textarea:focus {
           outline: none;
           border-color: #667eea;
-          box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+          box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
         }
         
         /* Switch styles */
@@ -2255,7 +2343,7 @@ const ProScannerBotIntegrated = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: #ccc;
+          background-color: #2d323e;
           transition: 0.3s;
           border-radius: 24px;
         }
@@ -2273,650 +2361,34 @@ const ProScannerBotIntegrated = () => {
         }
         
         .switch input:checked + .slider {
-          background-color: #667eea;
+          background: linear-gradient(135deg, #667eea, #764ba2);
         }
         
         .switch input:checked + .slider:before {
           transform: translateX(20px);
         }
         
-        .animate-pulse {
-          animation: pulse 1s infinite;
+        @media (max-width: 1000px) {
+          .main-layout {
+            grid-template-columns: 1fr;
+          }
+          
+          .pro-scanner-bot {
+            padding: 16px;
+          }
+          
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </>
   );
 };
 
-// Main TradeUiClone Component with both original and scanner bot
+// Main TradeUiClone Component - Only Pro Scanner Bot
 const TradeUiClone = observer(() => {
-  const [activeTab, setActiveTab] = useState<'pro-trader' | 'scanner-bot'>('scanner-bot');
-  const { run_panel, transactions } = useStore();
-  const apiRef = useRef<any>(null);
-  const tickStreamIdRef = useRef<string | null>(null);
-  
-  // Original Pro Trader state
-  const [symbols, setSymbols] = useState<{ symbol: string; display_name: string }[]>([]);
-  const [symbol, setSymbol] = useState('');
-  const [accountCurrency, setAccountCurrency] = useState('USD');
-  const [lastDigit, setLastDigit] = useState<number | null>(null);
-  const [digits, setDigits] = useState<number[]>([]);
-  const [ticksProcessed, setTicksProcessed] = useState(0);
-  const [stake, setStake] = useState(1);
-  const [ticks, setTicks] = useState(5);
-  const [digitMode, setDigitMode] = useState("over");
-  const [predictionDigit, setPredictionDigit] = useState(7);
-  const [parity, setParity] = useState("even");
-  const [direction, setDirection] = useState("rise");
-  const [matchType, setMatchType] = useState("matches");
-  const [matchDigit, setMatchDigit] = useState(4);
-  const [isRunningOriginal, setIsRunningOriginal] = useState(false);
-  const [status, setStatus] = useState('');
-  const stopFlagRef = useRef(false);
-  const lastOutcomeWasLossRef = useRef(false);
-  
-  // API Initialization for original trader
-  useEffect(() => {
-    const api = generateDerivApiInstance();
-    apiRef.current = api;
-    const init = async () => {
-      try {
-        const token = V2GetActiveToken();
-        const clientId = V2GetActiveClientId();
-        if (token && clientId) {
-          const { authorize, error } = await api.authorize(token);
-          if (!error && authorize) {
-            setAccountCurrency(authorize.currency || 'USD');
-          }
-        }
-        const { active_symbols, error: asErr } = await api.send({ active_symbols: 'brief' });
-        if (asErr) throw asErr;
-        const syn = (active_symbols || [])
-          .filter((s: any) => /synthetic/i.test(s.market) || /^R_/.test(s.symbol))
-          .map((s: any) => ({ symbol: s.symbol, display_name: s.display_name }));
-        setSymbols(syn);
-        if (!symbol && syn[0]?.symbol) {
-          setSymbol(syn[0].symbol);
-          startTicks(syn[0].symbol);
-        }
-      } catch (e: any) {
-        console.error('ProTrader init error', e);
-        setStatus(`Init error: ${e?.message || 'Unknown'}`);
-      }
-    };
-    init();
-    
-    return () => {
-      stopTicks();
-      if (apiRef.current) {
-        apiRef.current.disconnect?.();
-      }
-    };
-  }, []);
-  
-  const startTicks = async (sym: string) => {
-    stopTicks();
-    setDigits([]);
-    setLastDigit(null);
-    setTicksProcessed(0);
-    try {
-      const { subscription, error } = await apiRef.current.send({ ticks: sym, subscribe: 1 });
-      if (error) throw error;
-      if (subscription?.id) tickStreamIdRef.current = subscription.id;
-      
-      const onMsg = (evt: MessageEvent) => {
-        try {
-          const data = JSON.parse(evt.data as any);
-          if (data?.msg_type === 'tick' && data?.tick?.symbol === sym) {
-            const quote = data.tick.quote;
-            const digit = Number(String(quote).slice(-1));
-            setLastDigit(digit);
-            setDigits(prev => [...prev.slice(-8), digit]);
-            setTicksProcessed(prev => prev + 1);
-          }
-        } catch {}
-      };
-      apiRef.current?.connection?.addEventListener('message', onMsg);
-    } catch (e: any) {
-      console.error('startTicks error', e);
-      setStatus(`Tick stream error: ${e?.message || 'Unknown'}`);
-    }
-  };
-  
-  const stopTicks = () => {
-    if (tickStreamIdRef.current && apiRef.current) {
-      apiRef.current.forget?.({ forget: tickStreamIdRef.current });
-      tickStreamIdRef.current = null;
-    }
-  };
-  
-  const purchaseContractOriginal = async (tradeType: string, prediction?: number) => {
-    const token = V2GetActiveToken();
-    if (!token) throw new Error('No active token');
-    
-    const trade_option: any = {
-      amount: Number(stake),
-      basis: 'stake',
-      contractTypes: [tradeType],
-      currency: accountCurrency,
-      duration: Number(ticks),
-      duration_unit: 't',
-      symbol,
-    };
-    
-    if (prediction !== undefined) {
-      trade_option.prediction = Number(prediction);
-    }
-    
-    const buy_req = tradeOptionToBuy(tradeType, trade_option);
-    const { buy, error } = await apiRef.current.buy(buy_req);
-    if (error) throw error;
-    
-    setStatus(`Purchased: ${buy?.longcode || 'Contract'} (ID: ${buy?.contract_id})`);
-    
-    try {
-      const symbol_display = symbols.find(s => s.symbol === symbol)?.display_name || symbol;
-      transactions.onBotContractEvent({
-        contract_id: buy?.contract_id,
-        transaction_ids: { buy: buy?.transaction_id },
-        buy_price: buy?.buy_price,
-        currency: accountCurrency,
-        contract_type: tradeType as any,
-        underlying: symbol,
-        display_name: symbol_display,
-        date_start: Math.floor(Date.now() / 1000),
-        status: 'open',
-      } as any);
-    } catch {}
-    
-    // Subscribe to contract updates
-    try {
-      const res = await apiRef.current.send({
-        proposal_open_contract: 1,
-        contract_id: buy?.contract_id,
-        subscribe: 1,
-      });
-      const { error, proposal_open_contract: pocInit, subscription } = res || {};
-      if (error) throw error;
-      
-      let pocSubId: string | null = subscription?.id || null;
-      const targetId = String(buy?.contract_id || '');
-      
-      if (pocInit && String(pocInit?.contract_id || '') === targetId) {
-        transactions.onBotContractEvent(pocInit);
-      }
-      
-      const onMsg = (evt: MessageEvent) => {
-        try {
-          const data = JSON.parse(evt.data as any);
-          if (data?.msg_type === 'proposal_open_contract') {
-            const poc = data.proposal_open_contract;
-            if (!pocSubId && data?.subscription?.id) pocSubId = data.subscription.id;
-            if (String(poc?.contract_id || '') === targetId) {
-              transactions.onBotContractEvent(poc);
-              if (poc?.is_sold || poc?.status === 'sold') {
-                if (pocSubId) apiRef.current?.forget?.({ forget: pocSubId });
-                apiRef.current?.connection?.removeEventListener('message', onMsg);
-                const profit = Number(poc?.profit || 0);
-                lastOutcomeWasLossRef.current = profit <= 0;
-              }
-            }
-          }
-        } catch {}
-      };
-      apiRef.current?.connection?.addEventListener('message', onMsg);
-    } catch (subErr) {
-      console.error('subscribe poc error', subErr);
-    }
-    
-    return buy;
-  };
-  
-  const handleDigitsTrade = async () => {
-    try {
-      setStatus('Processing...');
-      const tradeType = digitMode === 'over' ? 'DIGITOVER' : 'DIGITUNDER';
-      await purchaseContractOriginal(tradeType, predictionDigit);
-    } catch (e: any) {
-      setStatus(`Error: ${e?.message || 'Unknown'}`);
-    }
-  };
-  
-  const handleEvenOddTrade = async () => {
-    try {
-      setStatus('Processing...');
-      const tradeType = parity === 'even' ? 'DIGITEVEN' : 'DIGITODD';
-      await purchaseContractOriginal(tradeType);
-    } catch (e: any) {
-      setStatus(`Error: ${e?.message || 'Unknown'}`);
-    }
-  };
-  
-  const handleRiseFallTrade = async () => {
-    try {
-      setStatus('Processing...');
-      const tradeType = direction === 'rise' ? 'CALL' : 'PUT';
-      await purchaseContractOriginal(tradeType);
-    } catch (e: any) {
-      setStatus(`Error: ${e?.message || 'Unknown'}`);
-    }
-  };
-  
-  const handleMatchDiffTrade = async () => {
-    try {
-      setStatus('Processing...');
-      const tradeType = matchType === 'matches' ? 'DIGITMATCH' : 'DIGITDIFF';
-      await purchaseContractOriginal(tradeType, matchDigit);
-    } catch (e: any) {
-      setStatus(`Error: ${e?.message || 'Unknown'}`);
-    }
-  };
-  
-  const themes = {
-    digits: { name: "Over / Under (Digits)", icon: Sigma, gradient: "from-blue-500 via-sky-500 to-cyan-500" },
-    evenodd: { name: "Even / Odd", icon: Dice5, gradient: "from-fuchsia-500 via-purple-500 to-indigo-500" },
-    risefall: { name: "Rise / Fall", icon: ArrowUp, gradient: "from-emerald-500 via-green-500 to-lime-500" },
-    matchdiff: { name: "Matches / Differs", icon: Hash, gradient: "from-rose-500 via-red-500 to-orange-500" },
-  };
-  
-  const TradeCard = ({ themeKey, children, statusText, onTradeOnce }: any) => {
-    const theme = themes[themeKey as keyof typeof themes];
-    const Icon = theme.icon;
-    const [isAuto, setIsAuto] = useState(false);
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -6 }}
-        transition={{ type: "spring", stiffness: 220, damping: 22 }}
-        className="trade-card"
-      >
-        <div className={`card-header ${themeKey}`}>
-          <div className="header-content">
-            <div className="icon-wrapper"><Icon size={20} /></div>
-            <h3>{theme.name}</h3>
-          </div>
-          <div className={`status-badge ${isAuto ? "active" : "inactive"}`}>
-            <span className={`status-dot ${isAuto ? "active" : "inactive"}`} />
-            {isAuto ? "Auto Trade Active" : "Stopped"}
-          </div>
-        </div>
-        <div className="card-content">
-          <div className="form-section">{children({ isAuto, setIsAuto })}</div>
-          <div className="controls-section">
-            <div className="control-label">
-              <span>{isAuto ? "Auto Trade" : "Trade Once"}</span>
-              <Switch checked={isAuto} onCheckedChange={setIsAuto} />
-            </div>
-            <div className="control-buttons">
-              {!isAuto && <button className="btn-primary" onClick={onTradeOnce}>Trade Once</button>}
-              {isAuto && (
-                <>
-                  <button className="btn-primary" onClick={() => { setIsAuto(true); /* start auto logic */ }}>Start Auto</button>
-                  <button className="btn-danger" onClick={() => setIsAuto(false)}>Stop Auto</button>
-                </>
-              )}
-            </div>
-          </div>
-          {statusText && <div className="status-footer">{statusText}</div>}
-        </div>
-      </motion.div>
-    );
-  };
-  
-  return (
-    <div className="trade-ui-clone">
-      <div className="tabs">
-        <button className={`tab ${activeTab === 'pro-trader' ? 'active' : ''}`} onClick={() => setActiveTab('pro-trader')}>
-          <Dice5 size={16} /> Pro Trader
-        </button>
-        <button className={`tab ${activeTab === 'scanner-bot' ? 'active' : ''}`} onClick={() => setActiveTab('scanner-bot')}>
-          <Scan size={16} /> Pro Scanner Bot
-        </button>
-      </div>
-      
-      {activeTab === 'pro-trader' ? (
-        <div className="pro-trader-container">
-          <div className="status-bar">
-            <div><strong>Symbol:</strong> {symbols.find(s => s.symbol === symbol)?.display_name || symbol || 'Loading...'}</div>
-            <div><strong>Last Digit:</strong> {lastDigit !== null ? lastDigit : 'Waiting...'}</div>
-            <div><strong>Ticks:</strong> {ticksProcessed}</div>
-            {status && <div className={`status-message ${status.includes('Error') ? 'error' : 'success'}`}>{status}</div>}
-          </div>
-          
-          <div className="trade-grid">
-            <TradeCard themeKey="digits" statusText={`Trading ${digitMode.toUpperCase()} ${predictionDigit} • Stake ${stake} • Ticks ${ticks}`} onTradeOnce={handleDigitsTrade}>
-              {() => (
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label>Trade Type</label>
-                    <div className="radio-group">
-                      <label><input type="radio" name="digits-type" value="over" checked={digitMode === "over"} onChange={() => setDigitMode("over")} /> Over</label>
-                      <label><input type="radio" name="digits-type" value="under" checked={digitMode === "under"} onChange={() => setDigitMode("under")} /> Under</label>
-                    </div>
-                  </div>
-                  <div className="form-field"><label>Prediction Digit</label><input type="number" min={0} max={9} value={predictionDigit} onChange={(e) => setPredictionDigit(Number(e.target.value))} /></div>
-                  <div className="form-field"><label>Stake</label><input type="number" min={0} value={stake} onChange={(e) => setStake(Number(e.target.value))} /></div>
-                  <div className="form-field"><label>Ticks</label><input type="number" min={1} value={ticks} onChange={(e) => setTicks(Number(e.target.value))} /></div>
-                </div>
-              )}
-            </TradeCard>
-            
-            <TradeCard themeKey="evenodd" statusText={`Trading ${parity.toUpperCase()} • Stake ${stake} • Ticks ${ticks}`} onTradeOnce={handleEvenOddTrade}>
-              {() => (
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label>Select</label>
-                    <div className="radio-group">
-                      <label><input type="radio" name="parity" value="even" checked={parity === "even"} onChange={() => setParity("even")} /> Even</label>
-                      <label><input type="radio" name="parity" value="odd" checked={parity === "odd"} onChange={() => setParity("odd")} /> Odd</label>
-                    </div>
-                  </div>
-                  <div className="form-field"><label>Stake</label><input type="number" min={0} value={stake} onChange={(e) => setStake(Number(e.target.value))} /></div>
-                  <div className="form-field"><label>Ticks</label><input type="number" min={1} value={ticks} onChange={(e) => setTicks(Number(e.target.value))} /></div>
-                </div>
-              )}
-            </TradeCard>
-            
-            <TradeCard themeKey="risefall" statusText={`Trading ${direction.toUpperCase()} • Stake ${stake} • Ticks ${ticks}`} onTradeOnce={handleRiseFallTrade}>
-              {() => (
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label>Direction</label>
-                    <div className="radio-group">
-                      <label><input type="radio" name="direction" value="rise" checked={direction === "rise"} onChange={() => setDirection("rise")} /> Rise <ArrowUp size={14} /></label>
-                      <label><input type="radio" name="direction" value="fall" checked={direction === "fall"} onChange={() => setDirection("fall")} /> Fall <ArrowDown size={14} /></label>
-                    </div>
-                  </div>
-                  <div className="form-field"><label>Stake</label><input type="number" min={0} value={stake} onChange={(e) => setStake(Number(e.target.value))} /></div>
-                  <div className="form-field"><label>Ticks</label><input type="number" min={1} value={ticks} onChange={(e) => setTicks(Number(e.target.value))} /></div>
-                </div>
-              )}
-            </TradeCard>
-            
-            <TradeCard themeKey="matchdiff" statusText={`Trading ${matchType.toUpperCase()} ${matchType === "matches" ? matchDigit : "(any except " + matchDigit + ")"} • Stake ${stake} • Ticks ${ticks}`} onTradeOnce={handleMatchDiffTrade}>
-              {() => (
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label>Type</label>
-                    <div className="radio-group">
-                      <label><input type="radio" name="matchType" value="matches" checked={matchType === "matches"} onChange={() => setMatchType("matches")} /> Matches</label>
-                      <label><input type="radio" name="matchType" value="differs" checked={matchType === "differs"} onChange={() => setMatchType("differs")} /> Differs</label>
-                    </div>
-                  </div>
-                  <div className="form-field"><label>Digit</label><input type="number" min={0} max={9} value={matchDigit} onChange={(e) => setMatchDigit(Number(e.target.value))} /></div>
-                  <div className="form-field"><label>Stake</label><input type="number" min={0} value={stake} onChange={(e) => setStake(Number(e.target.value))} /></div>
-                  <div className="form-field"><label>Ticks</label><input type="number" min={1} value={ticks} onChange={(e) => setTicks(Number(e.target.value))} /></div>
-                </div>
-              )}
-            </TradeCard>
-          </div>
-        </div>
-      ) : (
-        <ProScannerBotIntegrated />
-      )}
-      
-      <style>{`
-        .trade-ui-clone {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-        
-        .tabs {
-          display: flex;
-          gap: 8px;
-          padding: 16px 20px 0 20px;
-          background: white;
-          border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .tab {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 24px;
-          border: none;
-          background: none;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          color: #666;
-          border-radius: 12px 12px 0 0;
-          transition: all 0.2s ease;
-        }
-        
-        .tab:hover {
-          background: #f0f0f0;
-        }
-        
-        .tab.active {
-          color: #667eea;
-          border-bottom: 2px solid #667eea;
-        }
-        
-        .pro-trader-container {
-          padding: 20px;
-        }
-        
-        .status-bar {
-          background: white;
-          border-radius: 12px;
-          padding: 16px 24px;
-          margin-bottom: 24px;
-          display: flex;
-          gap: 32px;
-          align-items: center;
-          flex-wrap: wrap;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .status-bar > div {
-          font-size: 13px;
-        }
-        
-        .status-message {
-          margin-left: auto;
-          font-weight: 600;
-        }
-        
-        .status-message.error {
-          color: #dc2626;
-        }
-        
-        .status-message.success {
-          color: #10b981;
-        }
-        
-        .trade-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 24px;
-        }
-        
-        .trade-card {
-          background: white;
-          border-radius: 16px;
-          overflow: hidden;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .card-header {
-          padding: 16px 20px;
-          color: white;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        
-        .card-header.digits { background: linear-gradient(90deg, #3b82f6, #0ea5e9, #06b6d4); }
-        .card-header.evenodd { background: linear-gradient(90deg, #d946ef, #a855f7, #6366f1); }
-        .card-header.risefall { background: linear-gradient(90deg, #10b981, #22c55e, #84cc16); }
-        .card-header.matchdiff { background: linear-gradient(90deg, #f43f5e, #ef4444, #f97316); }
-        
-        .header-content {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        
-        .icon-wrapper {
-          padding: 6px;
-          background: rgba(255,255,255,0.2);
-          border-radius: 8px;
-        }
-        
-        .card-header h3 {
-          font-size: 14px;
-          margin: 0;
-        }
-        
-        .status-badge {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 11px;
-          padding: 4px 10px;
-          border-radius: 20px;
-        }
-        
-        .status-badge.active {
-          background: rgba(255,255,255,0.9);
-          color: #059669;
-        }
-        
-        .status-badge.inactive {
-          background: rgba(0,0,0,0.2);
-          color: white;
-        }
-        
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-        
-        .status-dot.active {
-          background: #10b981;
-          animation: pulse 1s infinite;
-        }
-        
-        .status-dot.inactive {
-          background: #f43f5e;
-        }
-        
-        .card-content {
-          padding: 20px;
-        }
-        
-        .form-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-        
-        .form-field label {
-          font-size: 11px;
-          color: #666;
-          display: block;
-          margin-bottom: 4px;
-        }
-        
-        .form-field input, .form-field select {
-          width: 100%;
-          padding: 6px 10px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          font-size: 12px;
-        }
-        
-        .radio-group {
-          display: flex;
-          gap: 12px;
-          align-items: center;
-        }
-        
-        .radio-group label {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 12px;
-          cursor: pointer;
-        }
-        
-        .controls-section {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-        }
-        
-        .control-label {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 12px;
-        }
-        
-        .control-buttons {
-          display: flex;
-          gap: 8px;
-        }
-        
-        .btn-primary, .btn-danger {
-          padding: 6px 14px;
-          border-radius: 8px;
-          border: none;
-          font-size: 11px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-        
-        .btn-primary {
-          background: #111827;
-          color: white;
-        }
-        
-        .btn-primary:hover {
-          background: #1f2937;
-        }
-        
-        .btn-danger {
-          background: #dc2626;
-          color: white;
-        }
-        
-        .btn-danger:hover {
-          background: #b91c1c;
-        }
-        
-        .status-footer {
-          text-align: center;
-          font-size: 11px;
-          padding: 8px;
-          background: #f8f9fa;
-          border-radius: 8px;
-          color: #666;
-        }
-        
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-        
-        @media (max-width: 768px) {
-          .trade-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .form-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-    </div>
-  );
+  return <ProScannerBot />;
 });
 
 export default TradeUiClone;
