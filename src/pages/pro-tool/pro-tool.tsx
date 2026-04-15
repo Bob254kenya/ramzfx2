@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import './pro-tool.scss';
+import './pro-scanner-bot.scss';
 
 // Types
 interface LogEntry {
@@ -628,91 +628,238 @@ const ProScannerBot = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 font-sans overflow-y-auto">
+      <TPSLNotificationPopup />
+      {showSocialPopup && <SocialNotificationPopup onClose={() => setShowSocialPopup(false)} />}
+      
+      <div className="pro-scanner-bot">
         {/* Header */}
-        <div className="flex flex-wrap justify-between items-center gap-3 bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-2xl px-4 py-3 mb-4 shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg"><Scan className="w-5 h-5 text-white" /></div>
-            <div><h1 className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Milliefx Pro Scanner Bot</h1><p className="text-xs text-slate-400">Advanced Market Scanning & Recovery System</p></div>
+        <div className="header">
+          <div className="header-left">
+            <div className="logo">
+              <Scan className="w-5 h-5" />
+            </div>
+            <div>
+              <h1>Milliefx Pro Scanner Bot</h1>
+              <p>Advanced Market Scanning & Recovery System</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge className={`${status.color} bg-slate-800/50 text-xs px-2 py-0.5`}>{status.icon} {status.label}</Badge>
-            {isRunning && <Badge variant="outline" className="text-xs text-yellow-400 animate-pulse border-yellow-400/30">P/L: ${netProfit.toFixed(2)}</Badge>}
-            {!isConnected && <Badge variant="destructive" className="text-xs">🔌 DISCONNECTED</Badge>}
+          <div className="header-right">
+            <Badge className={`status-badge ${status.color}`}>{status.icon} {status.label}</Badge>
+            {isRunning && <Badge variant="outline" className="pnl-badge">P/L: ${netProfit.toFixed(2)}</Badge>}
+            {!isConnected && <Badge variant="destructive" className="disconnect-badge">🔌 DISCONNECTED</Badge>}
           </div>
         </div>
         
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><Eye className="w-4 h-4 text-emerald-400"/><span className="text-sm font-semibold text-slate-200">Scan All Markets</span><Badge variant={scannerActive ? 'default' : 'secondary'} className="text-xs">{scannerActive ? '🟢 ON' : '⚫ OFF'}</Badge></div><Switch checked={scannerActive} onCheckedChange={setScannerActive} disabled={isRunning} /></div>
-            <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">{SCANNER_MARKETS.map(m => <Badge key={m.symbol} variant="outline" className={`text-xs ${tickCounts[m.symbol] ? 'border-emerald-500/50 text-emerald-400' : 'text-slate-500'}`}>{m.name}</Badge>)}</div>
+        <div className="stats-grid">
+          <div className="stat-card scanner-card">
+            <div className="stat-header">
+              <div className="stat-title"><Eye className="w-4 h-4"/><span>Scan All Markets</span><Badge variant={scannerActive ? 'default' : 'secondary'}>{scannerActive ? '🟢 ON' : '⚫ OFF'}</Badge></div>
+              <Switch checked={scannerActive} onCheckedChange={setScannerActive} disabled={isRunning} />
+            </div>
+            <div className="markets-list">{SCANNER_MARKETS.map(m => <Badge key={m.symbol} variant="outline" className={`market-badge ${tickCounts[m.symbol] ? 'active' : ''}`}>{m.name}</Badge>)}</div>
           </div>
-          <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><Zap className={`w-4 h-4 ${turboMode ? 'text-yellow-400 animate-pulse' : 'text-slate-400'}`}/><span className="text-sm font-semibold text-slate-200">Turbo Mode</span></div><Button size="sm" variant={turboMode ? 'default' : 'outline'} className={`h-7 text-xs ${turboMode ? 'bg-yellow-600 hover:bg-yellow-700' : ''}`} onClick={() => setTurboMode(!turboMode)} disabled={isRunning}>{turboMode ? '⚡ ON' : 'OFF'}</Button></div>
-            <div className="grid grid-cols-3 gap-2 text-center"><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">Latency</div><div className="font-mono text-sm font-bold text-emerald-400">{turboLatency}ms</div></div><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">Captured</div><div className="font-mono text-sm font-bold text-emerald-400">{ticksCaptured}</div></div><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">Missed</div><div className="font-mono text-sm font-bold text-red-400">{ticksMissed}</div></div></div>
+          <div className="stat-card turbo-card">
+            <div className="stat-header">
+              <div className="stat-title"><Zap className={`w-4 h-4 ${turboMode ? 'active' : ''}`}/><span>Turbo Mode</span></div>
+              <Button size="sm" variant={turboMode ? 'default' : 'outline'} className="turbo-btn" onClick={() => setTurboMode(!turboMode)} disabled={isRunning}>{turboMode ? '⚡ ON' : 'OFF'}</Button>
+            </div>
+            <div className="turbo-stats">
+              <div><div>Latency</div><div className="value">{turboLatency}ms</div></div>
+              <div><div>Captured</div><div className="value">{ticksCaptured}</div></div>
+              <div><div>Missed</div><div className="value missed">{ticksMissed}</div></div>
+            </div>
           </div>
-          <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-2"><span className="text-sm font-semibold text-slate-200">Live Stats</span><span className="font-mono text-lg font-bold text-emerald-400">${localBalance.toFixed(2)}</span></div>
-            <div className="grid grid-cols-3 gap-2 text-center"><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">W/L</div><div className="font-mono text-sm font-bold"><span className="text-emerald-400">{wins}</span>/<span className="text-red-400">{losses}</span></div></div><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">P/L</div><div className={`font-mono text-sm font-bold ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${netProfit.toFixed(2)}</div></div><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">Stake</div><div className="font-mono text-sm font-bold text-slate-200">${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="text-yellow-400 ml-1">M{martingaleStep}</span>}</div></div></div>
+          <div className="stat-card stats-card">
+            <div className="stat-header"><span>Live Stats</span><span className="balance">${localBalance.toFixed(2)}</span></div>
+            <div className="live-stats">
+              <div><div>W/L</div><div><span className="wins">{wins}</span>/<span className="losses">{losses}</span></div></div>
+              <div><div>P/L</div><div className={netProfit >= 0 ? 'profit' : 'loss'}>${netProfit.toFixed(2)}</div></div>
+              <div><div>Stake</div><div>${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="martingale-step">M{martingaleStep}</span>}</div></div>
+            </div>
           </div>
         </div>
         
         {/* Main Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="main-grid">
           {/* Left Column */}
-          <div className="lg:col-span-4 space-y-4">
+          <div className="left-column">
             {/* M1 Card */}
-            <div className="bg-slate-900/60 backdrop-blur-sm border-l-4 border-l-emerald-500 border border-slate-700/50 rounded-xl p-3">
-              <div className="flex justify-between items-center mb-2"><h3 className="text-sm font-bold text-emerald-400 flex items-center gap-1"><Home className="w-4 h-4"/> M1 — Home</h3><Switch checked={m1Enabled} onCheckedChange={setM1Enabled} disabled={isRunning} /></div>
-              <Select value={m1Symbol} onValueChange={setM1Symbol} disabled={isRunning}><SelectTrigger className="h-8 text-sm bg-slate-800/50 border-slate-700"><SelectValue /></SelectTrigger><SelectContent>{SCANNER_MARKETS.map(m => <SelectItem key={m.symbol} value={m.symbol}>{m.name}</SelectItem>)}</SelectContent></Select>
-              <Select value={m1Contract} onValueChange={setM1Contract} disabled={isRunning}><SelectTrigger className="h-8 text-sm bg-slate-800/50 border-slate-700 mt-2"><SelectValue /></SelectTrigger><SelectContent>{CONTRACT_TYPES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select>
-              {needsBarrier(m1Contract) && <Input type="number" min="0" max="9" value={m1Barrier} onChange={e => setM1Barrier(e.target.value)} className="h-8 text-sm bg-slate-800/50 border-slate-700 mt-2" disabled={isRunning} />}
-              <div className="border-t border-slate-700/50 mt-2 pt-2"><div className="flex justify-between items-center"><span className="text-xs font-semibold text-cyan-400 flex items-center gap-1"><Anchor className="w-3 h-3"/> Virtual Hook</span><Switch checked={m1HookEnabled} onCheckedChange={setM1HookEnabled} disabled={isRunning} /></div>{m1HookEnabled && <div className="grid grid-cols-2 gap-2 mt-1"><div><label className="text-xs text-slate-400">V-Losses</label><Input type="number" min="1" max="20" value={m1VirtualLossCount} onChange={e => setM1VirtualLossCount(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" /></div><div><label className="text-xs text-slate-400">Real Trades</label><Input type="number" min="1" max="10" value={m1RealCount} onChange={e => setM1RealCount(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" /></div></div>}</div>
+            <div className="config-card m1-card">
+              <div className="card-header"><h3><Home className="w-4 h-4"/> M1 — Home</h3><Switch checked={m1Enabled} onCheckedChange={setM1Enabled} disabled={isRunning} /></div>
+              <div className="card-content">
+                <Select value={m1Symbol} onValueChange={setM1Symbol} disabled={isRunning}>
+                  <SelectTrigger className="select-trigger"><SelectValue /></SelectTrigger>
+                  <SelectContent>{SCANNER_MARKETS.map(m => <SelectItem key={m.symbol} value={m.symbol}>{m.name}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={m1Contract} onValueChange={setM1Contract} disabled={isRunning}>
+                  <SelectTrigger className="select-trigger"><SelectValue /></SelectTrigger>
+                  <SelectContent>{CONTRACT_TYPES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+                {needsBarrier(m1Contract) && <Input type="number" min="0" max="9" value={m1Barrier} onChange={e => setM1Barrier(e.target.value)} className="input-field" disabled={isRunning} />}
+                <div className="hook-section">
+                  <div className="hook-header"><span><Anchor className="w-3 h-3"/> Virtual Hook</span><Switch checked={m1HookEnabled} onCheckedChange={setM1HookEnabled} disabled={isRunning} /></div>
+                  {m1HookEnabled && <div className="hook-inputs"><div><label>V-Losses</label><Input type="number" min="1" max="20" value={m1VirtualLossCount} onChange={e => setM1VirtualLossCount(e.target.value)} disabled={isRunning} /></div><div><label>Real Trades</label><Input type="number" min="1" max="10" value={m1RealCount} onChange={e => setM1RealCount(e.target.value)} disabled={isRunning} /></div></div>}
+                </div>
+              </div>
             </div>
+            
             {/* M2 Card */}
-            <div className="bg-slate-900/60 backdrop-blur-sm border-l-4 border-l-purple-500 border border-slate-700/50 rounded-xl p-3">
-              <div className="flex justify-between items-center mb-2"><h3 className="text-sm font-bold text-purple-400 flex items-center gap-1"><RefreshCw className="w-4 h-4"/> M2 — Recovery</h3><Switch checked={m2Enabled} onCheckedChange={setM2Enabled} disabled={isRunning} /></div>
-              <Select value={m2Symbol} onValueChange={setM2Symbol} disabled={isRunning}><SelectTrigger className="h-8 text-sm bg-slate-800/50 border-slate-700"><SelectValue /></SelectTrigger><SelectContent>{SCANNER_MARKETS.map(m => <SelectItem key={m.symbol} value={m.symbol}>{m.name}</SelectItem>)}</SelectContent></Select>
-              <Select value={m2Contract} onValueChange={setM2Contract} disabled={isRunning}><SelectTrigger className="h-8 text-sm bg-slate-800/50 border-slate-700 mt-2"><SelectValue /></SelectTrigger><SelectContent>{CONTRACT_TYPES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select>
-              {needsBarrier(m2Contract) && <Input type="number" min="0" max="9" value={m2Barrier} onChange={e => setM2Barrier(e.target.value)} className="h-8 text-sm bg-slate-800/50 border-slate-700 mt-2" disabled={isRunning} />}
-              <div className="border-t border-slate-700/50 mt-2 pt-2"><div className="flex justify-between items-center"><span className="text-xs font-semibold text-cyan-400 flex items-center gap-1"><Anchor className="w-3 h-3"/> Virtual Hook</span><Switch checked={m2HookEnabled} onCheckedChange={setM2HookEnabled} disabled={isRunning} /></div>{m2HookEnabled && <div className="grid grid-cols-2 gap-2 mt-1"><div><label className="text-xs text-slate-400">V-Losses</label><Input type="number" min="1" max="20" value={m2VirtualLossCount} onChange={e => setM2VirtualLossCount(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" /></div><div><label className="text-xs text-slate-400">Real Trades</label><Input type="number" min="1" max="10" value={m2RealCount} onChange={e => setM2RealCount(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" /></div></div>}</div>
+            <div className="config-card m2-card">
+              <div className="card-header"><h3><RefreshCw className="w-4 h-4"/> M2 — Recovery</h3><Switch checked={m2Enabled} onCheckedChange={setM2Enabled} disabled={isRunning} /></div>
+              <div className="card-content">
+                <Select value={m2Symbol} onValueChange={setM2Symbol} disabled={isRunning}>
+                  <SelectTrigger className="select-trigger"><SelectValue /></SelectTrigger>
+                  <SelectContent>{SCANNER_MARKETS.map(m => <SelectItem key={m.symbol} value={m.symbol}>{m.name}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={m2Contract} onValueChange={setM2Contract} disabled={isRunning}>
+                  <SelectTrigger className="select-trigger"><SelectValue /></SelectTrigger>
+                  <SelectContent>{CONTRACT_TYPES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+                {needsBarrier(m2Contract) && <Input type="number" min="0" max="9" value={m2Barrier} onChange={e => setM2Barrier(e.target.value)} className="input-field" disabled={isRunning} />}
+                <div className="hook-section">
+                  <div className="hook-header"><span><Anchor className="w-3 h-3"/> Virtual Hook</span><Switch checked={m2HookEnabled} onCheckedChange={setM2HookEnabled} disabled={isRunning} /></div>
+                  {m2HookEnabled && <div className="hook-inputs"><div><label>V-Losses</label><Input type="number" min="1" max="20" value={m2VirtualLossCount} onChange={e => setM2VirtualLossCount(e.target.value)} disabled={isRunning} /></div><div><label>Real Trades</label><Input type="number" min="1" max="10" value={m2RealCount} onChange={e => setM2RealCount(e.target.value)} disabled={isRunning} /></div></div>}
+                </div>
+              </div>
             </div>
+            
             {/* Hook Stats */}
-            {(m1HookEnabled || m2HookEnabled) && <div className="bg-gradient-to-r from-cyan-950/40 to-blue-950/40 border border-cyan-500/30 rounded-xl p-3"><h3 className="text-xs font-semibold text-cyan-400 flex items-center gap-1 mb-2"><Anchor className="w-3 h-3"/> Hook Status</h3><div className="grid grid-cols-4 gap-2 text-center"><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">V-Win</div><div className="font-mono text-sm font-bold text-emerald-400">{vhFakeWins}</div></div><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">V-Loss</div><div className="font-mono text-sm font-bold text-red-400">{vhFakeLosses}</div></div><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">Streak</div><div className="font-mono text-sm font-bold text-yellow-400">{vhConsecLosses}</div></div><div className="bg-slate-800/50 rounded p-1"><div className="text-xs text-slate-400">State</div><div className={`text-sm font-bold ${vhStatus === 'confirmed' ? 'text-emerald-400' : vhStatus === 'waiting' ? 'text-yellow-400 animate-pulse' : 'text-slate-400'}`}>{vhStatus === 'confirmed' ? '✓' : vhStatus === 'waiting' ? '⏳' : '—'}</div></div></div></div>}
-            {/* Risk */}
-            <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3"><h3 className="text-sm font-semibold text-slate-200 flex items-center gap-1 mb-2"><Shield className="w-4 h-4"/> Risk Management</h3><div className="grid grid-cols-3 gap-2 mb-2"><div><label className="text-xs text-slate-400">Stake ($)</label><Input type="number" min="0.35" step="0.01" value={stake} onChange={e => setStake(e.target.value)} className="h-8 text-sm bg-slate-800/50 border-slate-700" disabled={isRunning} /></div><div><label className="text-xs text-slate-400">Take Profit</label><Input type="number" value={takeProfit} onChange={e => setTakeProfit(e.target.value)} className="h-8 text-sm bg-slate-800/50 border-slate-700" disabled={isRunning} /></div><div><label className="text-xs text-slate-400">Stop Loss</label><Input type="number" value={stopLoss} onChange={e => setStopLoss(e.target.value)} className="h-8 text-sm bg-slate-800/50 border-slate-700" disabled={isRunning} /></div></div><div className="flex justify-between items-center mb-2"><label className="text-sm text-slate-200">Martingale</label><Switch checked={martingaleOn} onCheckedChange={setMartingaleOn} disabled={isRunning} /></div>{martingaleOn && <div className="grid grid-cols-2 gap-2 mb-2"><div><label className="text-xs text-slate-400">Multiplier</label><Input type="number" min="1.1" step="0.1" value={martingaleMultiplier} onChange={e => setMartingaleMultiplier(e.target.value)} className="h-8 text-sm bg-slate-800/50 border-slate-700" disabled={isRunning} /></div><div><label className="text-xs text-slate-400">Max Steps</label><Input type="number" min="1" max="10" value={martingaleMaxSteps} onChange={e => setMartingaleMaxSteps(e.target.value)} className="h-8 text-sm bg-slate-800/50 border-slate-700" disabled={isRunning} /></div></div>}<div className="flex gap-3"><label className="flex items-center gap-1 text-sm text-slate-200"><input type="checkbox" checked={strategyM1Enabled} onChange={e => setStrategyM1Enabled(e.target.checked)} disabled={isRunning} className="rounded w-4 h-4" /> Strategy M1</label><label className="flex items-center gap-1 text-sm text-slate-200"><input type="checkbox" checked={strategyEnabled} onChange={e => setStrategyEnabled(e.target.checked)} disabled={isRunning} className="rounded w-4 h-4" /> Strategy M2</label></div></div>
-            {/* Strategy */}
-            {(strategyEnabled || strategyM1Enabled) && <div className="bg-slate-900/60 backdrop-blur-sm border border-yellow-500/30 rounded-xl p-3"><h3 className="text-sm font-semibold text-yellow-400 flex items-center gap-1 mb-2"><Zap className="w-4 h-4"/> Strategy Conditions</h3>
-              {strategyM1Enabled && <div className="border border-emerald-500/30 rounded-lg p-2 mb-2"><div className="flex justify-between items-center mb-1"><label className="text-xs font-semibold text-emerald-400">M1 Strategy</label><div className="flex gap-1"><Button size="sm" variant={m1StrategyMode === 'pattern' ? 'default' : 'outline'} className="h-6 text-xs" onClick={() => setM1StrategyMode('pattern')} disabled={isRunning}>Pattern</Button><Button size="sm" variant={m1StrategyMode === 'digit' ? 'default' : 'outline'} className="h-6 text-xs" onClick={() => setM1StrategyMode('digit')} disabled={isRunning}>Digit</Button></div></div>{m1StrategyMode === 'pattern' ? <><Textarea placeholder="E=Even O=Odd e.g. EEEOE" value={m1Pattern} onChange={e => setM1Pattern(e.target.value.toUpperCase().replace(/[^EO]/g, ''))} disabled={isRunning} className="h-16 text-sm bg-slate-800/50 border-slate-700" /><div className={`text-xs font-mono mt-1 ${m1PatternValid ? 'text-emerald-400' : 'text-red-400'}`}>{cleanM1Pattern.length === 0 ? 'Enter pattern...' : m1PatternValid ? `✓ ${cleanM1Pattern}` : `✗ Need 2+`}</div></> : <div className="grid grid-cols-3 gap-1"><Input type="number" min="1" max="50" value={m1DigitWindow} onChange={e => setM1DigitWindow(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" placeholder="Window" /><Select value={m1DigitCondition} onValueChange={setM1DigitCondition} disabled={isRunning}><SelectTrigger className="h-7 text-sm bg-slate-800/50 border-slate-700"><SelectValue /></SelectTrigger><SelectContent>{['==', '>', '<', '>=', '<='].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select><Input type="number" min="0" max="9" value={m1DigitCompare} onChange={e => setM1DigitCompare(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" placeholder="Digit" /></div>}</div>}
-              {strategyEnabled && <div className="border border-purple-500/30 rounded-lg p-2"><div className="flex justify-between items-center mb-1"><label className="text-xs font-semibold text-purple-400">M2 Strategy</label><div className="flex gap-1"><Button size="sm" variant={m2StrategyMode === 'pattern' ? 'default' : 'outline'} className="h-6 text-xs" onClick={() => setM2StrategyMode('pattern')} disabled={isRunning}>Pattern</Button><Button size="sm" variant={m2StrategyMode === 'digit' ? 'default' : 'outline'} className="h-6 text-xs" onClick={() => setM2StrategyMode('digit')} disabled={isRunning}>Digit</Button></div></div>{m2StrategyMode === 'pattern' ? <><Textarea placeholder="E=Even O=Odd e.g. OOEEO" value={m2Pattern} onChange={e => setM2Pattern(e.target.value.toUpperCase().replace(/[^EO]/g, ''))} disabled={isRunning} className="h-16 text-sm bg-slate-800/50 border-slate-700" /><div className={`text-xs font-mono mt-1 ${m2PatternValid ? 'text-emerald-400' : 'text-red-400'}`}>{cleanM2Pattern.length === 0 ? 'Enter pattern...' : m2PatternValid ? `✓ ${cleanM2Pattern}` : `✗ Need 2+`}</div></> : <div className="grid grid-cols-3 gap-1"><Input type="number" min="1" max="50" value={m2DigitWindow} onChange={e => setM2DigitWindow(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" placeholder="Window" /><Select value={m2DigitCondition} onValueChange={setM2DigitCondition} disabled={isRunning}><SelectTrigger className="h-7 text-sm bg-slate-800/50 border-slate-700"><SelectValue /></SelectTrigger><SelectContent>{['==', '>', '<', '>=', '<='].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select><Input type="number" min="0" max="9" value={m2DigitCompare} onChange={e => setM2DigitCompare(e.target.value)} disabled={isRunning} className="h-7 text-sm bg-slate-800/50 border-slate-700" placeholder="Digit" /></div>}</div>}
-              {botStatus === 'waiting_pattern' && <div className="bg-yellow-500/10 border border-yellow-500/30 rounded p-1 text-xs text-yellow-400 animate-pulse text-center font-semibold mt-2">⏳ WAITING FOR PATTERN...</div>}
-              {botStatus === 'pattern_matched' && <div className="bg-emerald-500/10 border border-emerald-500/30 rounded p-1 text-xs text-emerald-400 text-center font-semibold animate-pulse mt-2">✅ PATTERN MATCHED! Taking trade...</div>}
-            </div>}
-            {/* Config */}
-            <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3"><h3 className="text-sm font-semibold text-slate-200 mb-2">💾 Bot Config</h3><Input placeholder="Enter bot name..." value={botName} onChange={e => setBotName(e.target.value)} disabled={isRunning} className="h-8 text-sm bg-slate-800/50 border-slate-700 mb-2" /><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="outline" className="h-8 text-xs gap-1 border-slate-700" disabled={isRunning || !botName.trim()} onClick={() => { const safeName = botName.trim().replace(/[^a-zA-Z0-9_-]/g, '_'); const config = currentConfig; const ts = new Date().toISOString().slice(0, 19).replace(/:/g, '-'); const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${safeName}_${ts}.json`; a.click(); URL.revokeObjectURL(url); }}><Download className="w-3 h-3"/> Save</Button><Button size="sm" variant="outline" className="h-8 text-xs gap-1 border-slate-700" disabled={isRunning} onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (ev: any) => { const file = ev.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const cfg = JSON.parse(e.target?.result as string); if (cfg.m1 && cfg.m2 && cfg.risk) handleLoadConfig(cfg); } catch {} }; reader.readAsText(file); }; input.click(); }}><Upload className="w-3 h-3"/> Load</Button></div></div>
+            {(m1HookEnabled || m2HookEnabled) && (
+              <div className="hook-stats">
+                <h3><Anchor className="w-3 h-3"/> Hook Status</h3>
+                <div className="stats-row">
+                  <div><div>V-Win</div><div className="win">{vhFakeWins}</div></div>
+                  <div><div>V-Loss</div><div className="loss">{vhFakeLosses}</div></div>
+                  <div><div>Streak</div><div className="streak">{vhConsecLosses}</div></div>
+                  <div><div>State</div><div className={`state ${vhStatus}`}>{vhStatus === 'confirmed' ? '✓' : vhStatus === 'waiting' ? '⏳' : '—'}</div></div>
+                </div>
+              </div>
+            )}
+            
+            {/* Risk Management */}
+            <div className="config-card risk-card">
+              <h3><Shield className="w-4 h-4"/> Risk Management</h3>
+              <div className="risk-inputs">
+                <div><label>Stake ($)</label><Input type="number" min="0.35" step="0.01" value={stake} onChange={e => setStake(e.target.value)} disabled={isRunning} /></div>
+                <div><label>Take Profit</label><Input type="number" value={takeProfit} onChange={e => setTakeProfit(e.target.value)} disabled={isRunning} /></div>
+                <div><label>Stop Loss</label><Input type="number" value={stopLoss} onChange={e => setStopLoss(e.target.value)} disabled={isRunning} /></div>
+              </div>
+              <div className="martingale-toggle"><label>Martingale</label><Switch checked={martingaleOn} onCheckedChange={setMartingaleOn} disabled={isRunning} /></div>
+              {martingaleOn && <div className="martingale-inputs"><div><label>Multiplier</label><Input type="number" min="1.1" step="0.1" value={martingaleMultiplier} onChange={e => setMartingaleMultiplier(e.target.value)} disabled={isRunning} /></div><div><label>Max Steps</label><Input type="number" min="1" max="10" value={martingaleMaxSteps} onChange={e => setMartingaleMaxSteps(e.target.value)} disabled={isRunning} /></div></div>}
+              <div className="strategy-checkboxes">
+                <label><input type="checkbox" checked={strategyM1Enabled} onChange={e => setStrategyM1Enabled(e.target.checked)} disabled={isRunning} /> Strategy M1</label>
+                <label><input type="checkbox" checked={strategyEnabled} onChange={e => setStrategyEnabled(e.target.checked)} disabled={isRunning} /> Strategy M2</label>
+              </div>
+            </div>
+            
+            {/* Strategy Conditions */}
+            {(strategyEnabled || strategyM1Enabled) && (
+              <div className="config-card strategy-card">
+                <h3><Zap className="w-4 h-4"/> Strategy Conditions</h3>
+                {strategyM1Enabled && (
+                  <div className="strategy-section m1-strategy">
+                    <div className="strategy-header"><label>M1 Strategy</label><div className="mode-buttons"><Button size="sm" variant={m1StrategyMode === 'pattern' ? 'default' : 'outline'} onClick={() => setM1StrategyMode('pattern')} disabled={isRunning}>Pattern</Button><Button size="sm" variant={m1StrategyMode === 'digit' ? 'default' : 'outline'} onClick={() => setM1StrategyMode('digit')} disabled={isRunning}>Digit</Button></div></div>
+                    {m1StrategyMode === 'pattern' ? (
+                      <>
+                        <Textarea placeholder="E=Even O=Odd e.g. EEEOE" value={m1Pattern} onChange={e => setM1Pattern(e.target.value.toUpperCase().replace(/[^EO]/g, ''))} disabled={isRunning} className="pattern-input" />
+                        <div className={`pattern-valid ${m1PatternValid ? 'valid' : 'invalid'}`}>{cleanM1Pattern.length === 0 ? 'Enter pattern...' : m1PatternValid ? `✓ ${cleanM1Pattern}` : `✗ Need 2+`}</div>
+                      </>
+                    ) : (
+                      <div className="digit-inputs"><Input type="number" min="1" max="50" value={m1DigitWindow} onChange={e => setM1DigitWindow(e.target.value)} disabled={isRunning} placeholder="Window" /><Select value={m1DigitCondition} onValueChange={setM1DigitCondition} disabled={isRunning}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{['==', '>', '<', '>=', '<='].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select><Input type="number" min="0" max="9" value={m1DigitCompare} onChange={e => setM1DigitCompare(e.target.value)} disabled={isRunning} placeholder="Digit" /></div>
+                    )}
+                  </div>
+                )}
+                {strategyEnabled && (
+                  <div className="strategy-section m2-strategy">
+                    <div className="strategy-header"><label>M2 Strategy</label><div className="mode-buttons"><Button size="sm" variant={m2StrategyMode === 'pattern' ? 'default' : 'outline'} onClick={() => setM2StrategyMode('pattern')} disabled={isRunning}>Pattern</Button><Button size="sm" variant={m2StrategyMode === 'digit' ? 'default' : 'outline'} onClick={() => setM2StrategyMode('digit')} disabled={isRunning}>Digit</Button></div></div>
+                    {m2StrategyMode === 'pattern' ? (
+                      <>
+                        <Textarea placeholder="E=Even O=Odd e.g. OOEEO" value={m2Pattern} onChange={e => setM2Pattern(e.target.value.toUpperCase().replace(/[^EO]/g, ''))} disabled={isRunning} className="pattern-input" />
+                        <div className={`pattern-valid ${m2PatternValid ? 'valid' : 'invalid'}`}>{cleanM2Pattern.length === 0 ? 'Enter pattern...' : m2PatternValid ? `✓ ${cleanM2Pattern}` : `✗ Need 2+`}</div>
+                      </>
+                    ) : (
+                      <div className="digit-inputs"><Input type="number" min="1" max="50" value={m2DigitWindow} onChange={e => setM2DigitWindow(e.target.value)} disabled={isRunning} placeholder="Window" /><Select value={m2DigitCondition} onValueChange={setM2DigitCondition} disabled={isRunning}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{['==', '>', '<', '>=', '<='].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select><Input type="number" min="0" max="9" value={m2DigitCompare} onChange={e => setM2DigitCompare(e.target.value)} disabled={isRunning} placeholder="Digit" /></div>
+                    )}
+                  </div>
+                )}
+                {botStatus === 'waiting_pattern' && <div className="pattern-waiting">⏳ WAITING FOR PATTERN...</div>}
+                {botStatus === 'pattern_matched' && <div className="pattern-matched">✅ PATTERN MATCHED! Taking trade...</div>}
+              </div>
+            )}
+            
+            {/* Bot Config */}
+            <div className="config-card config-card-buttons">
+              <h3>💾 Bot Config</h3>
+              <Input placeholder="Enter bot name..." value={botName} onChange={e => setBotName(e.target.value)} disabled={isRunning} className="bot-name-input" />
+              <div className="config-buttons">
+                <Button size="sm" variant="outline" disabled={isRunning || !botName.trim()} onClick={() => { const safeName = botName.trim().replace(/[^a-zA-Z0-9_-]/g, '_'); const config = currentConfig; const ts = new Date().toISOString().slice(0, 19).replace(/:/g, '-'); const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${safeName}_${ts}.json`; a.click(); URL.revokeObjectURL(url); }}><Download className="w-3 h-3"/> Save</Button>
+                <Button size="sm" variant="outline" disabled={isRunning} onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (ev: any) => { const file = ev.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const cfg = JSON.parse(e.target?.result as string); if (cfg.m1 && cfg.m2 && cfg.risk) handleLoadConfig(cfg); } catch {} }; reader.readAsText(file); }; input.click(); }}><Upload className="w-3 h-3"/> Load</Button>
+              </div>
+            </div>
           </div>
           
           {/* Right Column */}
-          <div className="lg:col-span-8 space-y-4">
+          <div className="right-column">
             {/* Live Digits */}
-            <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3"><div className="flex justify-between items-center mb-2"><h3 className="text-sm font-semibold text-slate-200">Live Digits — {activeSymbol}</h3><span className="text-xs text-slate-400 font-mono">Win Rate: {winRate}% | Staked: ${totalStaked.toFixed(2)}</span></div><div className="flex gap-1 justify-center flex-wrap">{activeDigits.length === 0 ? <span className="text-sm text-slate-400">Waiting for ticks...</span> : activeDigits.map((d, i) => { const isOver = d >= 5; const isEven = d % 2 === 0; const isLast = i === activeDigits.length - 1; return <div key={i} className={`w-10 h-12 rounded-lg flex flex-col items-center justify-center text-lg font-mono font-bold border transition-all ${isLast ? 'ring-2 ring-cyan-500 shadow-lg scale-105' : ''} ${isOver ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}><span>{d}</span><span className="text-[8px] opacity-60">{isOver ? 'O' : 'U'}{isEven ? 'E' : 'O'}</span></div>; })}</div></div>
+            <div className="digits-card">
+              <div className="digits-header"><h3>Live Digits — {activeSymbol}</h3><span className="winrate">Win Rate: {winRate}% | Staked: ${totalStaked.toFixed(2)}</span></div>
+              <div className="digits-container">{activeDigits.length === 0 ? <span className="waiting-text">Waiting for ticks...</span> : activeDigits.map((d, i) => { const isOver = d >= 5; const isEven = d % 2 === 0; const isLast = i === activeDigits.length - 1; return <div key={i} className={`digit ${isLast ? 'last' : ''} ${isOver ? 'over' : 'under'}`}><span>{d}</span><span className="digit-type">{isOver ? 'O' : 'U'}{isEven ? 'E' : 'O'}</span></div>; })}</div>
+            </div>
             
             {/* Start/Stop Button */}
-            <button onClick={isRunning ? stopBot : startBot} disabled={(!isRunning && (!isConnected || localBalance < parseFloat(stake)))} className={`relative w-full h-14 text-base font-bold rounded-xl transition-all duration-300 overflow-hidden ${isRunning ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white shadow-lg shadow-red-500/30 animate-pulse' : 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-500/30'} disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95`}>
-              <div className="relative flex items-center justify-center gap-2">{isRunning ? <><StopCircle className="w-5 h-5 animate-pulse"/> STOP BOT <span className="flex gap-0.5"><span className="w-1 h-1 bg-white rounded-full animate-bounce"/><span className="w-1 h-1 bg-white rounded-full animate-bounce delay-75"/><span className="w-1 h-1 bg-white rounded-full animate-bounce delay-150"/></span></> : <><Play className="w-5 h-5"/> START BOT</>}</div>
+            <button onClick={isRunning ? stopBot : startBot} disabled={(!isRunning && (!isConnected || localBalance < parseFloat(stake)))} className={`start-stop-btn ${isRunning ? 'stop' : 'start'}`}>
+              {isRunning ? <><StopCircle className="w-5 h-5 animate-pulse"/> STOP BOT</> : <><Play className="w-5 h-5"/> START BOT</>}
             </button>
             
             {/* Live Status Panel */}
-            <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3"><div className="flex justify-between items-center mb-2"><h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2"><Zap className="w-4 h-4 text-cyan-400"/> Live Status (Realtime)</h3>{isRunning && <span className="flex items-center gap-1 text-xs text-emerald-400 animate-pulse"><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span></span> ACTIVE</span>}</div><div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2"><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">Status</div><div className={`text-sm font-bold ${status.color} flex items-center justify-center gap-1`}><span>{status.icon}</span> {status.label}</div></div><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">Market</div><div className={`text-sm font-bold ${currentMarket === 1 ? 'text-emerald-400' : 'text-purple-400'}`}>{currentMarket === 1 ? 'M1 (HOME)' : 'M2 (RECOVERY)'}</div></div><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">Win Rate</div><div className="text-sm font-bold font-mono text-cyan-400">{winRate}%</div></div><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">Current P/L</div><div className={`text-sm font-bold font-mono ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${netProfit.toFixed(2)}</div></div></div><div className="grid grid-cols-2 md:grid-cols-4 gap-2"><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">Current Stake</div><div className="text-sm font-bold font-mono text-slate-200">${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="text-yellow-400 ml-1">M{martingaleStep}</span>}</div></div><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">Balance</div><div className="text-sm font-bold font-mono text-cyan-400">${localBalance.toFixed(2)}</div></div><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">Total Staked</div><div className="text-sm font-bold font-mono text-slate-200">${totalStaked.toFixed(2)}</div></div><div className="bg-slate-800/50 rounded-lg p-2 text-center"><div className="text-xs text-slate-400">W/L (Session)</div><div className="text-sm font-bold font-mono"><span className="text-emerald-400">{wins}</span>/<span className="text-red-400">{losses}</span></div></div></div>{botStatus === 'virtual_hook' && <div className="mt-2 text-center bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-1"><div className="text-xs text-cyan-400 animate-pulse flex items-center justify-center gap-2"><Anchor className="w-3 h-3"/> Virtual Hook Active — Waiting for {m1HookEnabled ? m1VirtualLossCount : m2VirtualLossCount} consecutive losses... <span className="font-bold">({vhConsecLosses}/{m1HookEnabled ? m1VirtualLossCount : m2VirtualLossCount})</span></div></div>}{botStatus === 'waiting_pattern' && <div className="mt-2 text-center bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-1"><div className="text-xs text-yellow-400 animate-pulse flex items-center justify-center gap-2"><Scan className="w-3 h-3"/> Scanning for pattern match...</div></div>}</div>
+            <div className="status-panel">
+              <div className="status-header"><h3><Zap className="w-4 h-4"/> Live Status (Realtime)</h3>{isRunning && <span className="active-indicator"><span className="pulse"></span> ACTIVE</span>}</div>
+              <div className="status-grid">
+                <div><div>Status</div><div className={`status-value ${status.color}`}>{status.icon} {status.label}</div></div>
+                <div><div>Market</div><div className={`market-value ${currentMarket === 1 ? 'm1' : 'm2'}`}>{currentMarket === 1 ? 'M1 (HOME)' : 'M2 (RECOVERY)'}</div></div>
+                <div><div>Win Rate</div><div className="winrate-value">{winRate}%</div></div>
+                <div><div>Current P/L</div><div className={`pl-value ${netProfit >= 0 ? 'profit' : 'loss'}`}>${netProfit.toFixed(2)}</div></div>
+                <div><div>Current Stake</div><div className="stake-value">${currentStake.toFixed(2)}{martingaleStep > 0 && <span className="martingale-step">M{martingaleStep}</span>}</div></div>
+                <div><div>Balance</div><div className="balance-value">${localBalance.toFixed(2)}</div></div>
+                <div><div>Total Staked</div><div className="total-staked">${totalStaked.toFixed(2)}</div></div>
+                <div><div>W/L (Session)</div><div className="wl-value"><span className="wins">{wins}</span>/<span className="losses">{losses}</span></div></div>
+              </div>
+              {botStatus === 'virtual_hook' && <div className="hook-status"><Anchor className="w-3 h-3"/> Virtual Hook Active — Waiting for {m1HookEnabled ? m1VirtualLossCount : m2VirtualLossCount} consecutive losses... <span className="count">({vhConsecLosses}/{m1HookEnabled ? m1VirtualLossCount : m2VirtualLossCount})</span></div>}
+              {botStatus === 'waiting_pattern' && <div className="scanning-status"><Scan className="w-3 h-3"/> Scanning for pattern match...</div>}
+            </div>
             
             {/* Activity Log */}
-            <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden"><div className="px-3 py-2 border-b border-slate-700/50 flex justify-between items-center"><h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2"><RefreshCw className="w-4 h-4 text-cyan-400"/> Activity Log <Badge variant="outline" className="text-xs">{logEntries.length} entries</Badge></h3><div className="flex items-center gap-2">{logEntries.length > 0 && logEntries[0].switchInfo && <span className="text-xs text-slate-400 font-mono hidden md:inline-block truncate max-w-xs">📊 {logEntries[0].switchInfo}</span>}<Button variant="ghost" size="sm" onClick={clearLog} className="h-7 w-7 p-0 text-slate-400 hover:text-red-400"><Trash2 className="w-4 h-4"/></Button></div></div><div className="max-h-[400px] overflow-auto"><table className="w-full text-xs"><thead className="text-xs text-slate-400 bg-slate-800/50 sticky top-0"><tr><th className="text-left p-2">Time</th><th className="text-left p-2">Mkt</th><th className="text-left p-2">Symbol</th><th className="text-left p-2">Type</th><th className="text-right p-2">Stake</th><th className="text-center p-2">Digit</th><th className="text-center p-2">Result</th><th className="text-right p-2">P/L</th><th className="text-right p-2">Bal</th></tr></thead><tbody>{logEntries.length === 0 ? <tr><td colSpan={9} className="text-center text-slate-400 py-8"><div className="flex flex-col items-center gap-1"><Zap className="w-8 h-8 text-slate-500"/><span>No trades yet — configure and start the bot</span></div></td></tr> : logEntries.map(e => <tr key={e.id} className={`border-b border-slate-700/30 hover:bg-slate-800/30 ${e.market === 'M1' ? 'border-l-2 border-l-emerald-500' : e.market === 'VH' ? 'border-l-2 border-l-cyan-500' : 'border-l-2 border-l-purple-500'}`}><td className="p-2 font-mono text-xs text-slate-400">{e.time}</td><td className={`p-2 font-bold text-xs ${e.market === 'M1' ? 'text-emerald-400' : e.market === 'VH' ? 'text-cyan-400' : 'text-purple-400'}`}>{e.market}</td><td className="p-2 font-mono text-xs text-slate-300">{e.symbol}</td><td className="p-2 text-xs text-slate-400">{e.contract.replace('DIGIT', '')}</td><td className="p-2 font-mono text-right text-xs">{e.market === 'VH' ? <span className="text-cyan-400">FAKE</span> : <span className="text-slate-300">${e.stake.toFixed(2)}</span>}{e.martingaleStep > 0 && e.market !== 'VH' && <span className="text-yellow-400 ml-1 font-bold">M{e.martingaleStep}</span>}</td><td className="p-2 text-center font-mono text-xs font-bold text-slate-300">{e.exitDigit}</td><td className="p-2 text-center"><span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${e.result === 'Win' || e.result === 'V-Win' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : e.result === 'Loss' || e.result === 'V-Loss' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-yellow-500/20 text-yellow-400 animate-pulse border border-yellow-500/30'}`}>{e.result === 'Pending' ? '...' : e.result === 'V-Win' ? '✓' : e.result === 'V-Loss' ? '✗' : e.result}</span></td><td className={`p-2 font-mono text-right text-xs font-bold ${e.pnl > 0 ? 'text-emerald-400' : e.pnl < 0 ? 'text-red-400' : 'text-slate-400'}`}>{e.result === 'Pending' ? '...' : e.market === 'VH' ? '-' : `${e.pnl > 0 ? '+' : ''}${e.pnl.toFixed(2)}`}</td><td className="p-2 font-mono text-right text-xs text-slate-400">{e.market === 'VH' ? '-' : `$${e.balance.toFixed(2)}`}</td></tr>)}</tbody></table></div></div>
+            <div className="log-card">
+              <div className="log-header"><h3><RefreshCw className="w-4 h-4"/> Activity Log <Badge variant="outline" className="log-count">{logEntries.length} entries</Badge></h3><div className="log-actions">{logEntries.length > 0 && logEntries[0].switchInfo && <span className="switch-info">📊 {logEntries[0].switchInfo}</span>}<Button variant="ghost" size="sm" onClick={clearLog} className="clear-log"><Trash2 className="w-4 h-4"/></Button></div></div>
+              <div className="log-table-wrapper">
+                <table className="log-table">
+                  <thead>
+                    <tr><th>Time</th><th>Mkt</th><th>Symbol</th><th>Type</th><th>Stake</th><th>Digit</th><th>Result</th><th>P/L</th><th>Bal</th></tr>
+                  </thead>
+                  <tbody>
+                    {logEntries.length === 0 ? (
+                      <tr><td colSpan={9} className="empty-log"><div><Zap className="w-8 h-8"/><span>No trades yet — configure and start the bot</span></div></td></tr>
+                    ) : logEntries.map(e => (
+                      <tr key={e.id} className={`log-row ${e.market === 'M1' ? 'm1-row' : e.market === 'VH' ? 'vh-row' : 'm2-row'}`}>
+                        <td className="time">{e.time}</td>
+                        <td className={`market ${e.market === 'M1' ? 'm1' : e.market === 'VH' ? 'vh' : 'm2'}`}>{e.market}</td>
+                        <td className="symbol">{e.symbol}</td>
+                        <td className="contract">{e.contract.replace('DIGIT', '')}</td>
+                        <td className="stake">{e.market === 'VH' ? <span className="fake">FAKE</span> : <span>${e.stake.toFixed(2)}</span>}{e.martingaleStep > 0 && e.market !== 'VH' && <span className="martingale-step">M{e.martingaleStep}</span>}</td>
+                        <td className="digit">{e.exitDigit}</td>
+                        <td className="result"><span className={`result-badge ${e.result === 'Win' || e.result === 'V-Win' ? 'win' : e.result === 'Loss' || e.result === 'V-Loss' ? 'loss' : 'pending'}`}>{e.result === 'Pending' ? '...' : e.result === 'V-Win' ? '✓' : e.result === 'V-Loss' ? '✗' : e.result}</span></td>
+                        <td className={`pnl ${e.pnl > 0 ? 'profit' : e.pnl < 0 ? 'loss' : ''}`}>{e.result === 'Pending' ? '...' : e.market === 'VH' ? '-' : `${e.pnl > 0 ? '+' : ''}${e.pnl.toFixed(2)}`}</td>
+                        <td className="balance">{e.market === 'VH' ? '-' : `$${e.balance.toFixed(2)}`}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      {showSocialPopup && <SocialNotificationPopup onClose={() => setShowSocialPopup(false)} />}
-      <TPSLNotificationPopup />
     </>
   );
 };
